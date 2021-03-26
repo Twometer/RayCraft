@@ -84,7 +84,14 @@ namespace RayCraft
                         Cursor.Position = center_s;
                     }));
 
-                    watch.Reset();
+                    try
+                    {
+                        watch.Reset();
+                    }
+                    catch
+                    {
+
+                    }
                 }
             });
             renderThread.Start();

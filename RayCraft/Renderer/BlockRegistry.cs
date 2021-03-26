@@ -16,7 +16,7 @@ namespace RayCraft.Renderer
             for (int i = 0; i < 256; i++)
                 BlockColors[i] = new ColorCollection(0, 0, 0);
 
-            Add(0, 0x0000BB);
+            Add(0, 0xAFC6E9);
             Add(1, 0x606060);
             Add(2, 0x75B049);
             Add(3, 0xB9855C);

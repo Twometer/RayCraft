@@ -15,10 +15,10 @@ namespace RayCraft.Renderer
 {
     public class WorldRenderer
     {
-        private const int MaxRayLength = 30;
-        private const float Precision = 0.2f;
+        private const int MaxRayLength = 60;
+        private const float Precision = 0.1f;
+        private const int PrecisionStep = 100;
         private const float EyeHeight = 1.8f;
-        private const int LightDistance = 150;
 
         private DisplayBuffer displayBuffer;
         private int width;
@@ -128,42 +128,40 @@ namespace RayCraft.Renderer
             Vector3 targetPos = new Vector3(0, 0, 0);
             World wld = RayCraftGame.Instance.World;
             int iterations = (int)((double)MaxRayLength / scaledRay.Length);
+            int scaler = 4;
             for (int i = 1; i < iterations; i++)
             {
                 targetPos += (scaledRay);
                 float x = origin.X + targetPos.X;
-                float y = origin.Y + 1.8f + targetPos.Y;
+                float y = origin.Y + EyeHeight + targetPos.Y;
                 float z = origin.Z + targetPos.Z;
                 int xf = (int)(x);
                 int yf = (int)(y);
                 int zf = (int)(z);
                 byte blockType = wld.GetBlock(xf, yf, zf);
-                if (i % 300 == 0)
+                if (i % PrecisionStep == 0)
                 {
-                    scaledRay = scaledRay * (4);
+                    scaledRay = scaledRay * (scaler > 1 ? scaler-- : 1);
                     iterations = (int)((double)MaxRayLength / scaledRay.Length);
                 }
                 if (blockType != 0)
                 {
-                    EnumFace face = EnumFace.NULL;
-                    if (i < LightDistance)
-                    {
-                        double xd = Math.Round(x - xf, 2);
-                        double yd = Math.Round(y - yf, 2);
-                        double zd = Math.Round(z - zf, 2);
-                        if (IsError(xd, 1))
-                            face = EnumFace.XPos;
-                        else if (IsError(xd, 0))
-                            face = EnumFace.XNeg;
-                        else if (IsError(yd, 1))
-                            face = EnumFace.YPos;
-                        else if (IsError(yd, 0))
-                            face = EnumFace.YNeg;
-                        else if (IsError(zd, 1))
-                            face = EnumFace.ZPos;
-                        else if (IsError(zd, 0))
-                            face = EnumFace.ZNeg;
-                    }
+                    EnumFace face = EnumFace.XPos;
+                    double xd = Math.Round(x - xf, 2);
+                    double yd = Math.Round(y - yf, 2);
+                    double zd = Math.Round(z - zf, 2);
+                    if (IsError(xd, 1))
+                        face = EnumFace.XPos;
+                    else if (IsError(xd, 0))
+                        face = EnumFace.XNeg;
+                    else if (IsError(yd, 1))
+                        face = EnumFace.YPos;
+                    else if (IsError(yd, 0))
+                        face = EnumFace.YNeg;
+                    else if (IsError(zd, 1))
+                        face = EnumFace.ZPos;
+                    else if (IsError(zd, 0))
+                        face = EnumFace.ZNeg;
                     return new HitResult(blockType, face, false);
                 }
             }
