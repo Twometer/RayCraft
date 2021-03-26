@@ -29,14 +29,13 @@
         private void InitializeComponent()
         {
             this.LoginPane = new System.Windows.Forms.Panel();
+            this.ServerLabel = new System.Windows.Forms.Label();
+            this.ServerBox = new System.Windows.Forms.TextBox();
             this.PlayButton = new System.Windows.Forms.Button();
             this.UsernameLabel = new System.Windows.Forms.Label();
             this.UsernameBox = new System.Windows.Forms.TextBox();
             this.TitleLabel = new System.Windows.Forms.Label();
-            this.RenderBtn = new System.Windows.Forms.Button();
             this.StatsLabel = new System.Windows.Forms.Label();
-            this.ServerLabel = new System.Windows.Forms.Label();
-            this.ServerBox = new System.Windows.Forms.TextBox();
             this.LoginPane.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,6 +52,26 @@
             this.LoginPane.Name = "LoginPane";
             this.LoginPane.Size = new System.Drawing.Size(391, 332);
             this.LoginPane.TabIndex = 0;
+            // 
+            // ServerLabel
+            // 
+            this.ServerLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ServerLabel.AutoSize = true;
+            this.ServerLabel.Location = new System.Drawing.Point(176, 173);
+            this.ServerLabel.Name = "ServerLabel";
+            this.ServerLabel.Size = new System.Drawing.Size(38, 13);
+            this.ServerLabel.TabIndex = 5;
+            this.ServerLabel.Text = "Server";
+            // 
+            // ServerBox
+            // 
+            this.ServerBox.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ServerBox.Location = new System.Drawing.Point(96, 192);
+            this.ServerBox.Name = "ServerBox";
+            this.ServerBox.Size = new System.Drawing.Size(199, 20);
+            this.ServerBox.TabIndex = 4;
+            this.ServerBox.Text = "localhost";
+            this.ServerBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // PlayButton
             // 
@@ -96,16 +115,6 @@
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "WinForms Minecraft";
             // 
-            // RenderBtn
-            // 
-            this.RenderBtn.Location = new System.Drawing.Point(12, 12);
-            this.RenderBtn.Name = "RenderBtn";
-            this.RenderBtn.Size = new System.Drawing.Size(98, 23);
-            this.RenderBtn.TabIndex = 1;
-            this.RenderBtn.Text = "Start Render";
-            this.RenderBtn.UseVisualStyleBackColor = true;
-            this.RenderBtn.Click += new System.EventHandler(this.RenderBtn_Click);
-            // 
             // StatsLabel
             // 
             this.StatsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -116,26 +125,6 @@
             this.StatsLabel.TabIndex = 2;
             this.StatsLabel.Text = "FPS";
             // 
-            // ServerLabel
-            // 
-            this.ServerLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ServerLabel.AutoSize = true;
-            this.ServerLabel.Location = new System.Drawing.Point(176, 173);
-            this.ServerLabel.Name = "ServerLabel";
-            this.ServerLabel.Size = new System.Drawing.Size(38, 13);
-            this.ServerLabel.TabIndex = 5;
-            this.ServerLabel.Text = "Server";
-            // 
-            // ServerBox
-            // 
-            this.ServerBox.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ServerBox.Location = new System.Drawing.Point(96, 192);
-            this.ServerBox.Name = "ServerBox";
-            this.ServerBox.Size = new System.Drawing.Size(199, 20);
-            this.ServerBox.TabIndex = 4;
-            this.ServerBox.Text = "localhost";
-            this.ServerBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -144,7 +133,6 @@
             this.ClientSize = new System.Drawing.Size(391, 332);
             this.Controls.Add(this.StatsLabel);
             this.Controls.Add(this.LoginPane);
-            this.Controls.Add(this.RenderBtn);
             this.DoubleBuffered = true;
             this.KeyPreview = true;
             this.Name = "MainForm";
@@ -166,7 +154,6 @@
         private System.Windows.Forms.TextBox UsernameBox;
         private System.Windows.Forms.Label TitleLabel;
         private System.Windows.Forms.Button PlayButton;
-        private System.Windows.Forms.Button RenderBtn;
         private System.Windows.Forms.Label StatsLabel;
         private System.Windows.Forms.Label ServerLabel;
         private System.Windows.Forms.TextBox ServerBox;

@@ -18,12 +18,14 @@ namespace RayCraft
 
         private void button1_Click(object sender, EventArgs e)
         {
-            RayCraftGame.Instance.Connect(new SessionToken("", UsernameBox.Text, "", ""), "localhost", 25565);
+            RayCraftGame.Instance.Connect(new SessionToken("", UsernameBox.Text, "", ""), ServerBox.Text, 25565);
             LoginPane.Visible = false;
+            BeginRendering();
         }
 
-        private void RenderBtn_Click(object sender, EventArgs e)
+        private void BeginRendering()
         {
+            Thread.Sleep(1000);
             var renderer = new WorldRenderer(ClientRectangle.Width, ClientRectangle.Height);
             Cursor.Hide();
             var center_c = new Point(Width / 2, Height / 2);
@@ -35,6 +37,11 @@ namespace RayCraft
                 {
                     watch.Start();
                     var img = renderer.RenderWorld();
+                    if (IsDisposed)
+                    {
+                        Environment.Exit(0);
+                        return;
+                    }
                     Invoke((MethodInvoker)(delegate
                     {
                         BackgroundImage = (Image)img.Clone();
@@ -50,23 +57,23 @@ namespace RayCraft
                         if (RayCraftGame.Instance.Player.Pitch < -90) RayCraftGame.Instance.Player.Pitch = -90;
                         if (w_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
-                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
-                        }
-                        if (s_down)
-                        {
                             RayCraftGame.Instance.Player.PosX += -Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
                             RayCraftGame.Instance.Player.PosZ += -Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
                         }
-                        if (a_down)
+                        if (s_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
-                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
+                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
+                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
                         }
-                        if (d_down)
+                        if (a_down)
                         {
                             RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90)));
                             RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90)));
+                        }
+                        if (d_down)
+                        {
+                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
+                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
                         }
                         if (shift_down) RayCraftGame.Instance.Player.PosY -= 1;
                         if (space_down) RayCraftGame.Instance.Player.PosY += 1;
@@ -74,11 +81,9 @@ namespace RayCraft
                     }));
 
                     watch.Reset();
-                    Thread.Sleep(10);
                 }
             });
             renderThread.Start();
-            RenderBtn.Visible = false;
         }
 
         private void MainForm_Load(object sender, EventArgs e)

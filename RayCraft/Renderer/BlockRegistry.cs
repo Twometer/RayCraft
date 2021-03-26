@@ -17,6 +17,21 @@ namespace RayCraft.Renderer
             BlockColors.Add(1, new ColorCollection(65, 65, 65));
             BlockColors.Add(2, ColorCollection.FromRgb(0x75B049));
             BlockColors.Add(3, ColorCollection.FromRgb(0xB9855C));
+            BlockColors.Add(4, ColorCollection.FromRgb(0x404040));
+            BlockColors.Add(5, ColorCollection.FromRgb(0x9F844D));
+            BlockColors.Add(8, ColorCollection.FromRgb(0x1F3A8E));
+            Add(9, 0x1A2C64);
+            Add(10, 0xC04406);
+            Add(11, 0xd48b26);
+            Add(12, 0xE2DAA4);
+            Add(13, 0x837A78);
+            Add(17, 0x463823);
+            Add(18, 0x3C9614);
+        }
+
+        private static void Add(byte id, int rgb)
+        {
+            BlockColors.Add(id, ColorCollection.FromRgb(rgb));
         }
 
     }

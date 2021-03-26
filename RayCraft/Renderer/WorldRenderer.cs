@@ -1,5 +1,6 @@
 ﻿using Craft.Client.World;
 using Craft.Client.World.Entities;
+using OpenTK;
 using RayCraft.Game;
 using System;
 using System.Collections.Concurrent;
@@ -27,6 +28,7 @@ namespace RayCraft.Renderer
         const int tileDiv = 4;
         private SemaphoreSlim sem = new SemaphoreSlim(0);
         private CountdownEvent e = new CountdownEvent(tileDiv * tileDiv);
+        private RenderMath math = new RenderMath();
 
         private class WorkItem
         {
@@ -49,12 +51,13 @@ namespace RayCraft.Renderer
             displayBuffer = new DisplayBuffer(width, height);
             this.width = width;
             this.height = height;
+            math.Initialize(width, height);
             BootThreads();
         }
 
         private void BootThreads()
         {
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < (tileDiv * tileDiv); i++)
             {
                 Thread thread = new Thread(() =>
                 {
@@ -68,14 +71,12 @@ namespace RayCraft.Renderer
                             {
                                 EntityPlayer player = RayCraftGame.Instance.Player;
                                 Location origin = new Location((float)player.PosX, (float)player.PosY, (float)player.PosZ, player.Yaw, player.Pitch);
-                                int hWidth = width / 2 / 10;
-                                int hHeight = height / 2 / 10;
-                                float d = (float)width / height * 4;
+
                                 for (int x = item.x; x < item.x + item.w; x++)
                                 {
                                     for (int y = item.y; y < item.y + item.h; y++)
                                     {
-                                        Vector ray = RenderMath.CreateRay(origin, (x - hWidth) / d, (y - hHeight) / d);
+                                        Vector3 ray = math.CreateRay(origin, x, y);
                                         displayBuffer.SetPixel(x, y, GetBlockColor(GetHitResult(origin, ray)));
                                     }
                                 }
@@ -90,7 +91,7 @@ namespace RayCraft.Renderer
 
       
 
-        public Bitmap RenderWorld()
+        public System.Drawing.Bitmap RenderWorld()
         {
             e.Reset();
             displayBuffer.Begin();
@@ -124,15 +125,15 @@ namespace RayCraft.Renderer
             return color.Lvl0;
         }
 
-        private HitResult GetHitResult(Location origin, Vector ray)
+        private HitResult GetHitResult(Location origin, Vector3 ray)
         {
-            Vector scaledRay = ray.Multiply(Precision);
-            Vector targetPos = new Vector(0, 0, 0);
+            Vector3 scaledRay = ray * (Precision);
+            Vector3 targetPos = new Vector3(0, 0, 0);
             World wld = RayCraftGame.Instance.World;
             int iterations = (int)((double)MaxRayLength / scaledRay.Length);
             for (int i = 1; i < iterations; i++)
             {
-                targetPos.Add(scaledRay);
+                targetPos += (scaledRay);
                 float x = origin.X + targetPos.X;
                 float y = origin.Y + 1.8f + targetPos.Y;
                 float z = origin.Z + targetPos.Z;
@@ -142,7 +143,7 @@ namespace RayCraft.Renderer
                 byte blockType = wld.GetBlock(xf, yf, zf);
                 if (i % 300 == 0)
                 {
-                    scaledRay = scaledRay.Multiply(4);
+                    scaledRay = scaledRay * (4);
                     iterations = (int)((double)MaxRayLength / scaledRay.Length);
                 }
                 if (blockType != 0)
@@ -174,7 +175,7 @@ namespace RayCraft.Renderer
 
         private bool IsError(double x, int y)
         {
-            return Math.Abs(y - x) <= 0.1;
+            return Math.Abs(y - x) <= Precision;
         }
     }
 }
