@@ -14,5 +14,5 @@ Scenes with open space (lots of sky showing) tend to be a lot slower than those 
 
 In short: Horrible
 
-![image-20210326160407200](C:\Users\twome\AppData\Roaming\Typora\typora-user-images\image-20210326160407200.png)
+![wtfisthis.png](Screenshot.png)
 
