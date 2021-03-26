@@ -50,14 +50,14 @@
             this.LoginPane.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LoginPane.Location = new System.Drawing.Point(0, 0);
             this.LoginPane.Name = "LoginPane";
-            this.LoginPane.Size = new System.Drawing.Size(391, 332);
+            this.LoginPane.Size = new System.Drawing.Size(400, 400);
             this.LoginPane.TabIndex = 0;
             // 
             // ServerLabel
             // 
             this.ServerLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ServerLabel.AutoSize = true;
-            this.ServerLabel.Location = new System.Drawing.Point(176, 173);
+            this.ServerLabel.Location = new System.Drawing.Point(181, 207);
             this.ServerLabel.Name = "ServerLabel";
             this.ServerLabel.Size = new System.Drawing.Size(38, 13);
             this.ServerLabel.TabIndex = 5;
@@ -66,7 +66,7 @@
             // ServerBox
             // 
             this.ServerBox.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ServerBox.Location = new System.Drawing.Point(96, 192);
+            this.ServerBox.Location = new System.Drawing.Point(101, 226);
             this.ServerBox.Name = "ServerBox";
             this.ServerBox.Size = new System.Drawing.Size(199, 20);
             this.ServerBox.TabIndex = 4;
@@ -76,7 +76,7 @@
             // PlayButton
             // 
             this.PlayButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.PlayButton.Location = new System.Drawing.Point(158, 241);
+            this.PlayButton.Location = new System.Drawing.Point(163, 275);
             this.PlayButton.Name = "PlayButton";
             this.PlayButton.Size = new System.Drawing.Size(75, 23);
             this.PlayButton.TabIndex = 3;
@@ -88,7 +88,7 @@
             // 
             this.UsernameLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(168, 119);
+            this.UsernameLabel.Location = new System.Drawing.Point(173, 153);
             this.UsernameLabel.Name = "UsernameLabel";
             this.UsernameLabel.Size = new System.Drawing.Size(55, 13);
             this.UsernameLabel.TabIndex = 2;
@@ -97,7 +97,7 @@
             // UsernameBox
             // 
             this.UsernameBox.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.UsernameBox.Location = new System.Drawing.Point(96, 138);
+            this.UsernameBox.Location = new System.Drawing.Point(101, 172);
             this.UsernameBox.Name = "UsernameBox";
             this.UsernameBox.Size = new System.Drawing.Size(199, 20);
             this.UsernameBox.TabIndex = 1;
@@ -109,7 +109,7 @@
             this.TitleLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.TitleLabel.AutoSize = true;
             this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TitleLabel.Location = new System.Drawing.Point(95, 68);
+            this.TitleLabel.Location = new System.Drawing.Point(100, 102);
             this.TitleLabel.Name = "TitleLabel";
             this.TitleLabel.Size = new System.Drawing.Size(201, 30);
             this.TitleLabel.TabIndex = 0;
@@ -119,7 +119,7 @@
             // 
             this.StatsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.StatsLabel.AutoSize = true;
-            this.StatsLabel.Location = new System.Drawing.Point(-1, 319);
+            this.StatsLabel.Location = new System.Drawing.Point(-1, 387);
             this.StatsLabel.Name = "StatsLabel";
             this.StatsLabel.Size = new System.Drawing.Size(27, 13);
             this.StatsLabel.TabIndex = 2;
@@ -130,7 +130,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(391, 332);
+            this.ClientSize = new System.Drawing.Size(400, 400);
             this.Controls.Add(this.StatsLabel);
             this.Controls.Add(this.LoginPane);
             this.DoubleBuffered = true;
