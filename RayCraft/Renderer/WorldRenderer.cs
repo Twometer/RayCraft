@@ -29,6 +29,7 @@ namespace RayCraft.Renderer
         private SemaphoreSlim sem = new SemaphoreSlim(0);
         private CountdownEvent e = new CountdownEvent(tileDiv * tileDiv);
         private RenderMath math = new RenderMath();
+        private Location currentLocation;
 
         private class WorkItem
         {
@@ -66,22 +67,15 @@ namespace RayCraft.Renderer
                         sem.Wait();
                         if (workItems.TryDequeue(out WorkItem item))
                         {
-
-                            if (item != null)
+                            for (int x = item.x; x < item.x + item.w; x++)
                             {
-                                EntityPlayer player = RayCraftGame.Instance.Player;
-                                Location origin = new Location((float)player.PosX, (float)player.PosY, (float)player.PosZ, player.Yaw, player.Pitch);
-
-                                for (int x = item.x; x < item.x + item.w; x++)
+                                for (int y = item.y; y < item.y + item.h; y++)
                                 {
-                                    for (int y = item.y; y < item.y + item.h; y++)
-                                    {
-                                        Vector3 ray = math.CreateRay(origin, x, y);
-                                        displayBuffer.SetPixel(x, y, GetBlockColor(GetHitResult(origin, ray)));
-                                    }
+                                    Vector3 ray = math.CreateRay(x, y);
+                                    displayBuffer.SetPixel(x, y, GetBlockColor(GetHitResult(currentLocation, ray)));
                                 }
-                                e.Signal();
                             }
+                            e.Signal();
                         }
                     }
                 });
@@ -89,21 +83,25 @@ namespace RayCraft.Renderer
             }
         }
 
-      
+
 
         public System.Drawing.Bitmap RenderWorld()
         {
             e.Reset();
             displayBuffer.Begin();
 
-            float w = width / tileDiv;
-            float h = height / tileDiv;
+            EntityPlayer player = RayCraftGame.Instance.Player;
+            currentLocation = new Location((float)player.PosX, (float)player.PosY, (float)player.PosZ, player.Yaw, player.Pitch);
+            math.UpdateMatrix(currentLocation);
+
+            float tileWidth = width / tileDiv;
+            float tileHeight = height / tileDiv;
 
             for (int i = 0; i < tileDiv; i++)
             {
                 for (int j = 0; j < tileDiv; j++)
                 {
-                    workItems.Enqueue(new WorkItem((int)(w * i), (int)(h * j), (int)w, (int)h));
+                    workItems.Enqueue(new WorkItem((int)(tileWidth * i), (int)(tileHeight * j), (int)tileWidth, (int)tileHeight));
                 }
             }
             sem.Release(tileDiv * tileDiv);
@@ -116,7 +114,6 @@ namespace RayCraft.Renderer
         {
             if (result == null) return BlockRegistry.BlockColors[0].Lvl0;
             if (result.HitEntity) return 0xff0000;
-            if (!BlockRegistry.BlockColors.ContainsKey(result.BlockType)) return 0;
             ColorCollection color = BlockRegistry.BlockColors[result.BlockType];
             if (result.Face == EnumFace.NULL) return color.Lvl0;
             if (result.Face == EnumFace.ZPos || result.Face == EnumFace.ZNeg) return color.Lvl1;

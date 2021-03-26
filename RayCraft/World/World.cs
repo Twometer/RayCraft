@@ -3,14 +3,15 @@ using OpenTK;
 using RayCraft.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Craft.Client.World
 {
     public class World
     {
-        private Chunk[] chks = new Chunk[1024];
-        private int alloc = 0;
-        //private Dictionary<long, Chunk> chunks = new Dictionary<long, Chunk>();
+        //private Chunk[] chks = new Chunk[1024];
+        private Chunk[,] chunks = new Chunk[64, 64];
+        //private Dictionary<ChunkKey, Chunk> chunks = new Dictionary<ChunkKey, Chunk>();
         private ConcurrentDictionary<int, Entity> entities = new ConcurrentDictionary<int, Entity>();
 
         public IEnumerable<Entity> GetEntities()
@@ -44,34 +45,32 @@ namespace Craft.Client.World
                 chunk.SetBlock(x & 15, y, z & 15, id);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetBlock(int x, int y, int z)
         {
             int cx = x >> 4;
             int cy = z >> 4;
-            //long h = Hash(cx,cy);
-            Chunk chunk = GetChunk(cx,cy);
+            Chunk chunk = GetChunk(cx, cy);
             if (chunk != null)
-                return chunk.GetBlock(x & 15, y, z & 15);
+                return chunk.GetBlock((uint)x & 15, (uint)y, (uint)z & 15);
             else return 0;
         }
 
         public void AddChunk(Chunk chunk)
         {
-            chks[alloc] = chunk;
-            alloc++;
+            chunks[chunk.x + 32, chunk.z + 32] = chunk;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Chunk GetChunkFromBlockCoords(int x, int z)
         {
             return GetChunk(x >> 4, z >> 4);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Chunk GetChunk(int x, int z)
         {
-            foreach (Chunk chk in chks)
-                if (chk.x == x && chk.z == z)
-                    return chk;
-            return null;
+            return chunks[x + 32, z + 32];
         }
 
         public void DestroyChunk(int x, int z)

@@ -30,11 +30,15 @@ namespace RayCraft
             Cursor.Hide();
             var center_c = new Point(Width / 2, Height / 2);
             var center_s = PointToScreen(center_c);
+            var lastFrame = DateTime.Now;
             Thread renderThread = new Thread(() =>
             {
                 Stopwatch watch = new Stopwatch();
                 while (true)
                 {
+                    var deltatime = (float)(DateTime.Now - lastFrame).TotalSeconds * 5;
+                    lastFrame = DateTime.Now;
+
                     watch.Start();
                     var img = renderer.RenderWorld();
                     if (IsDisposed)
@@ -51,32 +55,32 @@ namespace RayCraft
                         var dx = (p.X - center_c.X) / 2;
                         var dy = (p.Y - center_c.Y) / 2;
                         StatsLabel.Text = "FrameTime = " + watch.ElapsedMilliseconds.ToString() + "ms (" + (1000 / fps) + " fps)      " + dx + "      " + dy;
-                        RayCraftGame.Instance.Player.Yaw += dx / 2;
-                        RayCraftGame.Instance.Player.Pitch += dy / 2;
+                        RayCraftGame.Instance.Player.Yaw += (dx * 2) * deltatime;
+                        RayCraftGame.Instance.Player.Pitch += (dy * 2) * deltatime;
                         if (RayCraftGame.Instance.Player.Pitch > 90) RayCraftGame.Instance.Player.Pitch = 90;
                         if (RayCraftGame.Instance.Player.Pitch < -90) RayCraftGame.Instance.Player.Pitch = -90;
                         if (w_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += -Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
-                            RayCraftGame.Instance.Player.PosZ += -Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
+                            RayCraftGame.Instance.Player.PosX += -Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw)) * deltatime;
+                            RayCraftGame.Instance.Player.PosZ += -Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw)) * deltatime;
                         }
                         if (s_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
-                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw));
+                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw)) * deltatime;
+                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-RayCraftGame.Instance.Player.Yaw)) * deltatime;
                         }
                         if (a_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90)));
-                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90)));
+                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90))) * deltatime;
+                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw + 90))) * deltatime;
                         }
                         if (d_down)
                         {
-                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
-                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90)));
+                            RayCraftGame.Instance.Player.PosX += Math.Sin(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90))) * deltatime;
+                            RayCraftGame.Instance.Player.PosZ += Math.Cos(RenderMath.ToRadians(-(RayCraftGame.Instance.Player.Yaw - 90))) * deltatime;
                         }
-                        if (shift_down) RayCraftGame.Instance.Player.PosY -= 1;
-                        if (space_down) RayCraftGame.Instance.Player.PosY += 1;
+                        if (shift_down) RayCraftGame.Instance.Player.PosY -= deltatime;
+                        if (space_down) RayCraftGame.Instance.Player.PosY += deltatime;
                         Cursor.Position = center_s;
                     }));
 

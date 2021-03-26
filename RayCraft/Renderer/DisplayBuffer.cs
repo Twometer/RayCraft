@@ -32,7 +32,7 @@ namespace RayCraft.Renderer
         public void SetPixel(int x, int y, int rgb)
         {
             byte* colorPointer = scan0 + y * bitmapData.Stride + x * bpp / 8;
-            *((int*)colorPointer) = rgb;
+            *(int*)colorPointer = rgb;
         }
 
         public void Finish()

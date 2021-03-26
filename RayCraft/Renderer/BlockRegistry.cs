@@ -9,17 +9,20 @@ namespace RayCraft.Renderer
 {
     public static class BlockRegistry
     {
-        public static Dictionary<byte, ColorCollection> BlockColors { get; } = new Dictionary<byte, ColorCollection>();
+        public static ColorCollection[] BlockColors = new ColorCollection[256];
 
         static BlockRegistry()
         {
-            BlockColors.Add(0, new ColorCollection(60, 114, 240));
-            BlockColors.Add(1, new ColorCollection(65, 65, 65));
-            BlockColors.Add(2, ColorCollection.FromRgb(0x75B049));
-            BlockColors.Add(3, ColorCollection.FromRgb(0xB9855C));
-            BlockColors.Add(4, ColorCollection.FromRgb(0x404040));
-            BlockColors.Add(5, ColorCollection.FromRgb(0x9F844D));
-            BlockColors.Add(8, ColorCollection.FromRgb(0x1F3A8E));
+            for (int i = 0; i < 256; i++)
+                BlockColors[i] = new ColorCollection(0, 0, 0);
+
+            Add(0, 0x0000BB);
+            Add(1, 0x606060);
+            Add(2, 0x75B049);
+            Add(3, 0xB9855C);
+            Add(4, 0x404040);
+            Add(5, 0x9F844D);
+            Add(8, 0x1F3A8E);
             Add(9, 0x1A2C64);
             Add(10, 0xC04406);
             Add(11, 0xd48b26);
@@ -31,7 +34,7 @@ namespace RayCraft.Renderer
 
         private static void Add(byte id, int rgb)
         {
-            BlockColors.Add(id, ColorCollection.FromRgb(rgb));
+            BlockColors[id] = ColorCollection.FromRgb(rgb);
         }
 
     }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,15 +61,16 @@ namespace Craft.Client.World
             return z << 4;
         }
 
-        public byte GetBlock(int x, int y, int z)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte GetBlock(uint x, uint y, uint z)
         {
-            if (x >= 0 && y >= 0 && z >= 0 && x < 16 && y < 256 && z < 16)
+            if (x < 16 && y < 256 && z < 16)
             {
-                int secIdx = y >> 4;
+                uint secIdx = y >> 4;
                 Section section = sections[secIdx];
                 if (section == null)
                     return 0;
-                return section.Blocks[(((y & 15) * 16 + z) * 16 + x)];
+                return section.Blocks[((y & 15) * 16 + z) * 16 + x];
             }
             return 0;
         }
