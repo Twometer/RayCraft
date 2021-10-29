@@ -101,7 +101,7 @@
             this.UsernameBox.Name = "UsernameBox";
             this.UsernameBox.Size = new System.Drawing.Size(199, 20);
             this.UsernameBox.TabIndex = 1;
-            this.UsernameBox.Text = "DevClient";
+            this.UsernameBox.Text = "RayClient";
             this.UsernameBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // TitleLabel

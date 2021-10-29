@@ -62,17 +62,14 @@ namespace Craft.Client.World
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte GetBlock(uint x, uint y, uint z)
+        public byte GetBlock(int x, int y, int z)
         {
-            if (x < 16 && y < 256 && z < 16)
-            {
-                uint secIdx = y >> 4;
-                Section section = sections[secIdx];
-                if (section == null)
-                    return 0;
-                return section.Blocks[((y & 15) * 16 + z) * 16 + x];
-            }
-            return 0;
+            y &= 0xFF;
+            Section section = sections[y >> 4];
+            if (section == null)
+                return 0;
+            else
+                return section.Blocks[((((y & 0x0F) << 4) + (z & 0x0F)) << 4) + (x & 0x0F)];
         }
 
         public void SetBlock(int x, int y, int z, byte block)
@@ -89,13 +86,6 @@ namespace Craft.Client.World
         {
             if (isDestroyed)
                 return;
-            for (int i = 0; i < 16; i++)
-            {
-                if (sections[i] != null)
-                    sections[i].Blocks = null;
-            }
-            sections = null;
-            isDestroyed = true;
         }
 
         public void SetBlock(int x, int y, int z, int block)

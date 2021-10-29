@@ -4,12 +4,7 @@ using OpenTK;
 using RayCraft.Game;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RayCraft.Renderer
 {
@@ -67,12 +62,14 @@ namespace RayCraft.Renderer
                         sem.Wait();
                         if (workItems.TryDequeue(out WorkItem item))
                         {
-                            for (int x = item.x; x < item.x + item.w; x++)
+                            for (int y = item.y; y < item.y + item.h; y++)
                             {
-                                for (int y = item.y; y < item.y + item.h; y++)
+                                for (int x = item.x; x < item.x + item.w; x++)
                                 {
-                                    Vector3 ray = math.CreateRay(x, y);
-                                    displayBuffer.SetPixel(x, y, GetBlockColor(GetHitResult(currentLocation, ray)));
+                                    var ray = math.CreateRay(x, y);
+                                    var hitResult = GetHitResult(currentLocation, ray);
+                                    var blockColor = GetBlockColor(hitResult);
+                                    displayBuffer.SetPixel(x, y, blockColor);
                                 }
                             }
                             e.Signal();
@@ -124,32 +121,48 @@ namespace RayCraft.Renderer
 
         private HitResult GetHitResult(Location origin, Vector3 ray)
         {
-            Vector3 scaledRay = ray * (Precision);
-            Vector3 targetPos = new Vector3(0, 0, 0);
             World wld = RayCraftGame.Instance.World;
-            int iterations = (int)((double)MaxRayLength / scaledRay.Length);
-            int scaler = 4;
+            Vector3 scaledRay = ray * Precision;
+            int precisionIterCounter = 0;
+            int iterations = (int)(MaxRayLength / scaledRay.Length);
+            int scalar = 4;
+
+            float rx = origin.X;
+            float ry = origin.Y + EyeHeight;
+            float rz = origin.Z;
+
+            float dx = scaledRay.X;
+            float dy = scaledRay.Y;
+            float dz = scaledRay.Z;
+
             for (int i = 1; i < iterations; i++)
             {
-                targetPos += (scaledRay);
-                float x = origin.X + targetPos.X;
-                float y = origin.Y + EyeHeight + targetPos.Y;
-                float z = origin.Z + targetPos.Z;
-                int xf = (int)(x);
-                int yf = (int)(y);
-                int zf = (int)(z);
+                rx += dx;
+                ry += dy;
+                rz += dz;
+
+                int xf = (int)rx;
+                int yf = (int)ry;
+                int zf = (int)rz;
+
                 byte blockType = wld.GetBlock(xf, yf, zf);
-                if (i % PrecisionStep == 0)
+                if (precisionIterCounter++ >= PrecisionStep && scalar > 1)
                 {
-                    scaledRay = scaledRay * (scaler > 1 ? scaler-- : 1);
-                    iterations = (int)((double)MaxRayLength / scaledRay.Length);
+                    precisionIterCounter = 0;
+                    dx *= scalar;
+                    dy *= scalar;
+                    dz *= scalar;
+                    scaledRay.X = dx;
+                    scaledRay.Y = dy;
+                    scaledRay.Z = dz;
+                    iterations = (int)(MaxRayLength / scaledRay.Length);
                 }
                 if (blockType != 0)
                 {
                     EnumFace face = EnumFace.XPos;
-                    double xd = Math.Round(x - xf, 2);
-                    double yd = Math.Round(y - yf, 2);
-                    double zd = Math.Round(z - zf, 2);
+                    float xd = rx - xf;
+                    float yd = ry - yf;
+                    float zd = rz - zf;
                     if (IsError(xd, 1))
                         face = EnumFace.XPos;
                     else if (IsError(xd, 0))

@@ -54,16 +54,18 @@ namespace Craft.Net.Packets.Play
             }
 
             int chunkECount = 0;
-            foreach (ChunkExtracted e in ce)
+            lock (chunks)
             {
-                int chunkX = xCoords[chunkECount];
-                int chunkZ = zCoords[chunkECount];
-                Chunk theChunk = new Chunk(chunkX, chunkZ);
-                theChunk.Initialize(e, chunkECount, (ushort)e.bitmask);
-                chunks.Add(theChunk);
-                chunkECount++;
+                foreach (ChunkExtracted e in ce)
+                {
+                    int chunkX = xCoords[chunkECount];
+                    int chunkZ = zCoords[chunkECount];
+                    Chunk theChunk = new Chunk(chunkX, chunkZ);
+                    theChunk.Initialize(e, chunkECount, (ushort)e.bitmask);
+                    chunks.Add(theChunk);
+                    chunkECount++;
+                }
             }
-
         }
 
         public void Send(PacketBuffer buffer)

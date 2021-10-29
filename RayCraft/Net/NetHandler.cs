@@ -154,9 +154,14 @@ namespace Craft.Net
         }
         internal void HandleS26MapChunkBulk(S26MapChunkBulk s26MapChunkBulk)
         {
-            foreach (var ch in s26MapChunkBulk.chunks)
-                RayCraftGame.Instance.World.AddChunk(ch);
+            lock (s26MapChunkBulk.chunks) { 
+            var chunkNum = s26MapChunkBulk.chunks.Count;
+            for (int i = 0; i < chunkNum; i++)
+                RayCraftGame.Instance.World.AddChunk(s26MapChunkBulk.chunks[i]);
+            //foreach (var ch in s26MapChunkBulk.chunks)
+
             s26MapChunkBulk.chunks.Clear();
+            }
         }
 
         internal void HandleS40Disconnect(S40Disconnect s40Disconnect)

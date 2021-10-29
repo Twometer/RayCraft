@@ -49,10 +49,10 @@ namespace Craft.Client.World
         public byte GetBlock(int x, int y, int z)
         {
             int cx = x >> 4;
-            int cy = z >> 4;
-            Chunk chunk = GetChunk(cx, cy);
+            int cz = z >> 4;
+            var chunk = chunks[cx + 32, cz + 32];
             if (chunk != null)
-                return chunk.GetBlock((uint)x & 15, (uint)y, (uint)z & 15);
+                return chunk.GetBlock(x, y, z);
             else return 0;
         }
 
