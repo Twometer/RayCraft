@@ -48,9 +48,13 @@ namespace Craft.Client.World
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetBlock(int x, int y, int z)
         {
-            int cx = x >> 4;
-            int cz = z >> 4;
-            var chunk = chunks[cx + 32, cz + 32];
+            uint cx = (uint)(x >> 4) + 32;
+            uint cz = (uint)(z >> 4) + 32;
+
+            if (cx > 63 || cz > 63)
+                return 0;
+
+            var chunk = chunks[cx, cz];
             if (chunk != null)
                 return chunk.GetBlock(x, y, z);
             else return 0;
