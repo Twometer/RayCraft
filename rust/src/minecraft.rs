@@ -8,8 +8,8 @@ pub struct McClient {
 }
 
 impl McClient {
-    pub fn connect() -> Result<McClient, Error> {
-        match TcpStream::connect("localhost:25565") {
+    pub fn connect(addr: &str) -> Result<McClient, Error> {
+        match TcpStream::connect(addr) {
             Ok(stream) => {
                 println!("Connected to minecraft server");
                 return Ok(McClient { socket: stream });
@@ -21,10 +21,15 @@ impl McClient {
         }
     }
 
+    pub fn login(&mut self, username: &str) {
+        self.send_handshake("dummy", 0, 2);
+        self.send_login(username);
+    }
+
     pub fn send_packet(&mut self, id: u32, payload: &McBuffer) {
         let mut packet = McBuffer::new();
-        let packetLen = calc_varint_size(id) + payload.len();
-        packet.write_varint(packetLen as u32);
+        let packet_len = calc_varint_size(id) + payload.len();
+        packet.write_varint(packet_len as u32);
         packet.write_varint(id);
         packet.write_buf(payload);
         self.socket.write(packet.data());
@@ -49,11 +54,7 @@ impl McClient {
 fn calc_varint_size(mut value: u32) -> usize {
     let mut size: usize = 0;
     loop {
-        let mut cur_byte = (value & 0x7f) as u8;
         value >>= 7;
-        if value != 0 {
-            cur_byte |= 0x80;
-        }
         size += 1;
         if value == 0 {
             break;
