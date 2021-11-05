@@ -1,16 +1,10 @@
-﻿using OpenTK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TamperCraft.Protocol.Util;
+﻿using RayCraft.Utils;
 
 namespace Craft.Net.Util
 {
     public class BlockPos
     {
-        private static int NUM_X_BITS = 1 + MathCustom.CalculateLogBaseTwo(TamperCraft.Protocol.Util.MathHelper.NextPowerOfTwo(30000000));
+        private static int NUM_X_BITS = 1 + MathCustom.CalculateLogBaseTwo(MathHelper.NextPowerOfTwo(30000000));
         private static int NUM_Z_BITS = NUM_X_BITS;
         private static int NUM_Y_BITS = 64 - NUM_X_BITS - NUM_Z_BITS;
         private static int Y_SHIFT = 0 + NUM_Z_BITS;
@@ -78,7 +72,7 @@ namespace Craft.Net.Util
 
         private static int CalculateLogBaseTwoDeBruijn(int value)
         {
-            value = IsPowerOfTwo(value) ? value : TamperCraft.Protocol.Util.MathHelper.NextPowerOfTwo(value);
+            value = IsPowerOfTwo(value) ? value : MathHelper.NextPowerOfTwo(value);
             return multiplyDeBruijnBitPosition[(int)(value * 125613361L >> 27) & 31];
         }
 

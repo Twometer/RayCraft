@@ -1,6 +1,4 @@
 ﻿using Craft.Client.World.Entities;
-using OpenTK;
-using RayCraft.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
