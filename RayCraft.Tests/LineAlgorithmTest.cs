@@ -68,5 +68,39 @@ namespace RayCraft.Tests
                 }
             }
         }
+
+        private void Intersect3d(Vector3 location, Vector3 direction, Span<(int, int, int)> hits)
+        {
+            int x = (int)MathF.Floor(location.X);
+            int y = (int)MathF.Floor(location.Y);
+            int z = (int)MathF.Floor(location.Z);
+
+            int orientationX = MathF.Sign(direction.X);
+            int orientationY = MathF.Sign(direction.Y);
+            int orientationZ = MathF.Sign(direction.Z);
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                float rx = (x + orientationX - location.X) / direction.X;
+                float ry = (y + orientationY - location.Y) / direction.Y;
+                float rz = (z + orientationZ - location.Z) / direction.Z;
+
+                if (rx < ry && rx < rz)
+                {
+                    hits[i] = (x += orientationX, y, z);
+                    location = new Vector3(x, location.Y + rx * direction.Y, location.Z + rx * direction.Z);
+                }
+                else if (ry < rx && ry < rz)
+                {
+                    hits[i] = (x, y += orientationY, z);
+                    location = new Vector3(location.X + ry * direction.X, y, location.Z + ry * direction.Z);
+                }
+                else
+                {
+                    hits[i] = (x, y, z += orientationZ);
+                    location = new Vector3(location.X + rz * direction.X, location.Y + rz * direction.Y, z);
+                }
+            }
+        }
     }
 }

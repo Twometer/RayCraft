@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RayCraft", "RayCraft\RayCra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCraft.Tests", "RayCraft.Tests\RayCraft.Tests.csproj", "{11D768D2-8C7F-4047-9C69-A4E9FE8D2BCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayCraft.Benchmarks", "RayCraft.Benchmarks\RayCraft.Benchmarks.csproj", "{A3BBAFAC-9DE1-4F96-8775-A0DF356A2414}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{11D768D2-8C7F-4047-9C69-A4E9FE8D2BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11D768D2-8C7F-4047-9C69-A4E9FE8D2BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11D768D2-8C7F-4047-9C69-A4E9FE8D2BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3BBAFAC-9DE1-4F96-8775-A0DF356A2414}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3BBAFAC-9DE1-4F96-8775-A0DF356A2414}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3BBAFAC-9DE1-4F96-8775-A0DF356A2414}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3BBAFAC-9DE1-4F96-8775-A0DF356A2414}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
