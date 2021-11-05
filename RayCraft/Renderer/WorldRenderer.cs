@@ -1,14 +1,14 @@
 ﻿using Craft.Client.World;
 using Craft.Client.World.Entities;
-using OpenTK;
 using RayCraft.Game;
 using System;
 using System.Collections.Concurrent;
+using System.Numerics;
 using System.Threading;
 
 namespace RayCraft.Renderer
 {
-    using line_t = Single;
+    using line_t = Int32;
 
     public class WorldRenderer
     {
@@ -253,7 +253,7 @@ namespace RayCraft.Renderer
             World wld = RayCraftGame.Instance.World;
             Vector3 scaledRay = ray * Precision;
             int precisionIterCounter = 0;
-            int iterations = (int)(MaxRayLength / scaledRay.Length);
+            int iterations = (int)(MaxRayLength / scaledRay.Length());
             int scalar = 4;
 
             float rx = origin.X;
@@ -284,7 +284,7 @@ namespace RayCraft.Renderer
                     scaledRay.X = dx;
                     scaledRay.Y = dy;
                     scaledRay.Z = dz;
-                    iterations = (int)(MaxRayLength / scaledRay.Length);
+                    iterations = (int)(MaxRayLength / scaledRay.Length());
                 }
                 if (blockType != 0)
                 {

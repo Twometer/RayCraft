@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TamperCraft.Protocol.Util
+namespace RayCraft.Utils
 {
     public static class MathHelper
     {
