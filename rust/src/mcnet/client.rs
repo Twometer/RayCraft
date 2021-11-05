@@ -1,18 +1,18 @@
-use std::io::{Error, Read, Write};
+use std::io::{Error, Write};
 use std::net::TcpStream;
 
-use crate::buffer::McBuffer;
+use super::Buffer;
 
-pub struct McClient {
+pub struct Client {
     socket: TcpStream,
 }
 
-impl McClient {
-    pub fn connect(addr: &str) -> Result<McClient, Error> {
+impl Client {
+    pub fn connect(addr: &str) -> Result<Client, Error> {
         match TcpStream::connect(addr) {
             Ok(stream) => {
                 println!("Connected to minecraft server");
-                return Ok(McClient { socket: stream });
+                return Ok(Client { socket: stream });
             }
             Err(e) => {
                 println!("Failed to connect: {}", e);
@@ -26,17 +26,19 @@ impl McClient {
         self.send_login(username);
     }
 
-    pub fn send_packet(&mut self, id: u32, payload: &McBuffer) {
-        let mut packet = McBuffer::new();
+    pub fn send_packet(&mut self, id: u32, payload: &Buffer) {
+        let mut packet = Buffer::new();
         let packet_len = calc_varint_size(id) + payload.len();
         packet.write_varint(packet_len as u32);
         packet.write_varint(id);
         packet.write_buf(payload);
-        self.socket.write(packet.data());
+        self.socket
+            .write(packet.data())
+            .expect("failed to send packet");
     }
 
     pub fn send_handshake(&mut self, hostname: &str, port: u16, next_state: u32) {
-        let mut payload = McBuffer::new();
+        let mut payload = Buffer::new();
         payload.write_varint(47); // Protocol version for 1.8.x
         payload.write_string(hostname);
         payload.write_u16(port);
@@ -45,7 +47,7 @@ impl McClient {
     }
 
     pub fn send_login(&mut self, username: &str) {
-        let mut payload = McBuffer::new();
+        let mut payload = Buffer::new();
         payload.write_string(username);
         self.send_packet(0x00, &payload);
     }

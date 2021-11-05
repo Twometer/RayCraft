@@ -1,11 +1,7 @@
-use crate::buffer::McBuffer;
-
-mod buffer;
-mod minecraft;
+mod mcnet;
 
 fn main() {
-    println!("Twometer's Minecraft Client in Rust");
-    let mut client = minecraft::McClient::connect("localhost:25565").expect("Failed to connect");
+    let mut client = mcnet::Client::connect("localhost:25565").expect("Failed to connect");
     client.login("Rustacean");
     loop {}
 }

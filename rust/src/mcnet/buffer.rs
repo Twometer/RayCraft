@@ -1,14 +1,10 @@
-pub struct McBuffer {
+pub struct Buffer {
     buf: Vec<u8>,
-    idx: u32,
 }
 
-impl McBuffer {
-    pub fn new() -> McBuffer {
-        McBuffer {
-            buf: Vec::new(),
-            idx: 0,
-        }
+impl Buffer {
+    pub fn new() -> Buffer {
+        Buffer { buf: Vec::new() }
     }
 
     pub fn write_varint(&mut self, mut value: u32) {
@@ -40,7 +36,7 @@ impl McBuffer {
         return self.buf.len();
     }
 
-    pub fn write_buf(&mut self, other: &McBuffer) {
+    pub fn write_buf(&mut self, other: &Buffer) {
         self.buf.extend(&other.buf);
     }
 
