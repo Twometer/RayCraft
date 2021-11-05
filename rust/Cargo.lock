@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "RayCraft"
+name = "ray_craft"
 version = "0.1.0"
