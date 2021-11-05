@@ -121,19 +121,50 @@ namespace RayCraft.Renderer
             return color.Lvl0;
         }
 
+        private bool TestRayAabbIntersection(float originX, float originY, float originZ, float rayX, float rayY, float rayZ, line_t minX, line_t minY, line_t minZ)
+        {
+            var maxX = minX + 1;
+            var maxY = minY + 1;
+            var maxZ = minZ + 1;
+            var tMin = -1E9f;
+            var tMax = 1E9f;
+            if (rayX != 0f)
+            {
+                var tx1 = (minX - originX) / rayX;
+                var tx2 = (maxX - originX) / rayX;
+                tMin = Math.Max(tMin, Math.Min(tx1, tx2));
+                tMax = Math.Min(tMax, Math.Max(tx1, tx2));
+            }
+            if (rayY != 0f)
+            {
+                var ty1 = (minY - originY) / rayY;
+                var ty2 = (maxY - originY) / rayY;
+                tMin = Math.Max(tMin, Math.Min(ty1, ty2));
+                tMax = Math.Min(tMax, Math.Max(ty1, ty2));
+            }
+            if (rayZ != 0f)
+            {
+                var tz1 = (minZ - originZ) / rayZ;
+                var tz2 = (maxZ - originZ) / rayZ;
+                tMin = Math.Max(tMin, Math.Min(tz1, tz2));
+                tMax = Math.Min(tMax, Math.Max(tz1, tz2));
+            }
+
+            return tMax >= tMin;
+        }
 
 
-        private HitResult BlockLookup(line_t x, line_t y, line_t z)
+        private HitResult BlockLookup(Vector3 origin, Vector3 ray, line_t x, line_t y, line_t z)
         {
             var blockId = RayCraftGame.Instance.World.GetBlock((int)x, (int)y, (int)z);
-            if (blockId != 0)
+            if (blockId != 0 && TestRayAabbIntersection(origin.X, origin.Y, origin.Z, ray.X, ray.Y, ray.Z, x, y, z))
             {
                 return new HitResult(blockId, EnumFace.YPos, false);
             }
             return null;
         }
 
-        private HitResult Bresenham3d(line_t x1, line_t y1, line_t z1, line_t x2, line_t y2, line_t z2)
+        private HitResult Bresenham3d(Vector3 origin, Vector3 ray, line_t x1, line_t y1, line_t z1, line_t x2, line_t y2, line_t z2)
         {
             var dx = Math.Abs(x2 - x1);
             var dy = Math.Abs(y2 - y1);
@@ -175,7 +206,7 @@ namespace RayCraft.Renderer
                     p1 += 2 * dy;
                     p2 += 2 * dz;
 
-                    var result = BlockLookup(x1, y1, z1);
+                    var result = BlockLookup(origin, ray, x1, y1, z1);
                     if (result != null)
                         return result;
 
@@ -201,7 +232,7 @@ namespace RayCraft.Renderer
                     p1 += 2 * dx;
                     p2 += 2 * dz;
 
-                    var result = BlockLookup(x1, y1, z1);
+                    var result = BlockLookup(origin, ray, x1, y1, z1);
                     if (result != null)
                         return result;
                 }
@@ -226,7 +257,7 @@ namespace RayCraft.Renderer
                     p1 += 2 * dy;
                     p2 += 2 * dx;
 
-                    var result = BlockLookup(x1, y1, z1);
+                    var result = BlockLookup(origin, ray, x1, y1, z1);
                     if (result != null)
                         return result;
                 }
@@ -245,7 +276,7 @@ namespace RayCraft.Renderer
             float y2 = y1 + ray.Y * MaxRayLength;
             float z2 = z1 + ray.Z * MaxRayLength;
 
-            return Bresenham3d((line_t)x1, (line_t)y1, (line_t)z1, (line_t)x2, (line_t)y2, (line_t)z2);
+            return Bresenham3d(new Vector3(x1, y1, z1), ray, (line_t)x1, (line_t)y1, (line_t)z1, (line_t)x2, (line_t)y2, (line_t)z2);
         }
 
         private HitResult GetHitResult0(Location origin, Vector3 ray)
