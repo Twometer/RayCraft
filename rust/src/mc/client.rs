@@ -61,19 +61,25 @@ impl Client {
         match self.state {
             State::Login => self.handle_login_packet(packet_id, buf),
             State::Play => self.handle_play_packet(packet_id, buf),
-            _ => println!(
-                "cannot handle packet {} in state {:?}",
-                packet_id, self.state
-            ),
         }
     }
 
     pub fn send_packet(&mut self, id: u32, payload: &WriteBuffer) {
         let mut packet = WriteBuffer::new();
-        let packet_len = calc_varint_size(id) + payload.len();
 
-        // TODO: Compressed message format
-        packet.write_varint(packet_len as u32);
+        if self.compression_threshold > 0 {
+            // FIXME: The Minecraft protocol requires packets to be of a different format when compression is enabled.
+            //        However, packets below a certain threshold are not actually compressed. This code does not implement
+            //        the actual compression, which is why outbound packets which are larger than the threshold (typically
+            //        256 bytes)  will probably cause a disconnect. However, 99% of packets are <256 b
+            let packet_len = calc_varint_size(id) + calc_varint_size(0) + payload.len();
+            packet.write_varint(packet_len as u32);
+            packet.write_varint(0);
+        } else {
+            let packet_len = calc_varint_size(id) + payload.len();
+            packet.write_varint(packet_len as u32);
+        }
+
         packet.write_varint(id);
         packet.write_buf(payload);
 
