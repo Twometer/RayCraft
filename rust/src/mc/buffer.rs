@@ -98,6 +98,13 @@ impl ReadBuffer {
         return f64::from_be_bytes(buf);
     }
 
+    pub fn read_string(&mut self) -> String {
+        let len = self.read_var_int();
+        let mut buf = vec![0u8; len as usize];
+        self.read_bytes(&mut buf);
+        return String::from_utf8(buf).expect("invalid string received");
+    }
+
     pub fn decompress(&mut self) {
         unimplemented!();
     }

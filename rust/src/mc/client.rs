@@ -40,7 +40,6 @@ impl Client {
     pub fn connect(addr: &str) -> Result<Client, Error> {
         match TcpStream::connect(addr) {
             Ok(stream) => {
-                println!("Connected to minecraft server");
                 return Ok(Client {
                     socket: stream,
                     compression_threshold: 0,
@@ -50,7 +49,6 @@ impl Client {
                 });
             }
             Err(e) => {
-                println!("Failed to connect: {}", e);
                 return Err(e);
             }
         }
@@ -135,24 +133,22 @@ impl Client {
     fn handle_login_packet(&mut self, packet_id: i32, mut packet_buf: ReadBuffer) {
         match packet_id {
             0x02 => {
-                println!("login completed");
                 self.state = State::Play;
+                println!("Login completed");
             }
             0x03 => {
                 self.compression_threshold = packet_buf.read_var_int() as usize;
-                println!("set compression threshold: {}", self.compression_threshold);
+                println!("Set compression threshold: {}", self.compression_threshold);
             }
             _ => {}
         }
     }
 
     fn handle_play_packet(&mut self, packet_id: i32, mut packet_buf: ReadBuffer) {
-        println!("Received packet id #{}", packet_id,);
         match packet_id {
             0x00 => {
                 // Keep Alive
                 let timestamp = packet_buf.read_var_int();
-                println!("keepalive {}", timestamp);
                 self.send_keep_alive(timestamp);
             }
             0x01 => {
@@ -160,12 +156,14 @@ impl Client {
                 self.player.entity_id = packet_buf.read_i32();
                 self.player.game_mode = packet_buf.read_u8();
                 println!(
-                    "logged in with entity id {} and gamemode {}",
+                    "Logged in with entity id {} and gamemode {}",
                     self.player.entity_id, self.player.game_mode
                 );
             }
             0x02 => {
                 // Chat
+                let msg = packet_buf.read_string();
+                println!("Received chat message: {}", msg);
             }
             0x03 => {
                 // Time
