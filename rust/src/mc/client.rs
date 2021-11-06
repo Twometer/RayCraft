@@ -174,6 +174,10 @@ impl Client {
                 // Health
                 self.player.health = packet_buf.read_f32();
                 self.player.hunger = packet_buf.read_var_int();
+                println!(
+                    "Updated health={},hunger={}",
+                    self.player.health, self.player.hunger
+                );
             }
             0x08 => {
                 // PosLook
@@ -183,6 +187,10 @@ impl Client {
 
                 self.player.rot_x = packet_buf.read_f32();
                 self.player.rot_y = packet_buf.read_f32();
+                println!(
+                    "Teleported player to x={}, y={}, z={}",
+                    self.player.pos_x, self.player.pos_y, self.player.pos_z
+                );
             }
             _ => {}
         }
