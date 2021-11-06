@@ -1,7 +1,7 @@
-mod mcnet;
+mod mc;
 
 fn main() {
-    let mut client = mcnet::Client::connect("localhost:25565").expect("Failed to connect");
+    let mut client = mc::Client::connect("localhost:25565").expect("Failed to connect");
     client.login("Rustacean");
     loop {}
 }
