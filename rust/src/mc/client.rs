@@ -1,7 +1,7 @@
 use std::io::{Error, Read, Write};
 use std::net::TcpStream;
 
-use super::{calc_varint_size, read_var_int, ReadBuffer, WriteBuffer};
+use super::{block_pos_to_idx, calc_varint_size, read_var_int, ReadBuffer, WriteBuffer};
 
 #[derive(Debug)]
 pub enum State {
@@ -9,31 +9,39 @@ pub enum State {
     Play,
 }
 
+pub struct Chunk {
+    x: i32,
+    z: i32,
+    continuous: bool,
+    bitmask: u16,
+    block_data: Vec<u8>,
+}
+
 #[derive(Default)]
 pub struct World {
-    time: i64,
-    age: i64,
+    pub time: i64,
+    pub age: i64,
 }
 
 #[derive(Default)]
 pub struct Player {
-    entity_id: i32,
-    game_mode: u8,
-    health: f32,
-    hunger: i32,
-    pos_x: f32,
-    pos_y: f32,
-    pos_z: f32,
-    rot_x: f32,
-    rot_y: f32,
+    pub entity_id: i32,
+    pub game_mode: u8,
+    pub health: f32,
+    pub hunger: i32,
+    pub pos_x: f32,
+    pub pos_y: f32,
+    pub pos_z: f32,
+    pub rot_x: f32,
+    pub rot_y: f32,
 }
 
 pub struct Client {
+    pub player: Player,
+    pub world: World,
     socket: TcpStream,
     compression_threshold: usize,
     state: State,
-    player: Player,
-    world: World,
 }
 
 impl Client {
@@ -192,7 +200,81 @@ impl Client {
                     self.player.pos_x, self.player.pos_y, self.player.pos_z
                 );
             }
+            0x26 => {
+                // Chunk bulk
+                let has_skylight = packet_buf.read_bool();
+                let num_chunks = packet_buf.read_var_int();
+
+                let mut chunks = Vec::<Chunk>::new();
+                for _ in 1..num_chunks {
+                    chunks.push(Chunk {
+                        x: packet_buf.read_i32(),
+                        z: packet_buf.read_i32(),
+                        continuous: true,
+                        bitmask: packet_buf.read_u16(),
+                        block_data: vec![0; 16 * 16 * 256],
+                    });
+                }
+
+                for mut chunk in chunks {
+                    let sections_read = chunk.read_from(&mut packet_buf);
+                    packet_buf.skip(compute_unused_chunk_data_size(
+                        sections_read,
+                        has_skylight,
+                        &chunk,
+                    ) as u64);
+                    self.world.add_chunk(chunk);
+                }
+
+                println!("Received {} chunks", num_chunks);
+            }
             _ => {}
         }
     }
+}
+
+impl Chunk {
+    pub fn read_from(&mut self, packet_buf: &mut ReadBuffer) -> i32 {
+        let mut sections_read: i32 = 0;
+
+        // Iterate possible sections
+        for idx in 0..15 {
+            // Check if section is present
+            let section_mask = 1 << idx;
+            if self.bitmask & section_mask != 0 {
+                self.read_section_from(idx, packet_buf);
+                sections_read += 1;
+            }
+        }
+
+        return sections_read;
+    }
+
+    fn read_section_from(&mut self, idx: u32, packet_buf: &mut ReadBuffer) {
+        let base_dst_idx = block_pos_to_idx(0, idx * 16, 0);
+
+        for idx in 0..(16 * 16 * 16) - 1 {
+            let block_data = packet_buf.read_u16_le();
+
+            // Currently, we only use the block_id
+            // let block_meta = block_data & 15;
+            let block_id = block_data >> 4;
+
+            let dst_idx = base_dst_idx + idx;
+            self.block_data[dst_idx as usize] = block_id as u8;
+        }
+    }
+}
+
+impl World {
+    pub fn add_chunk(&mut self, chunk: Chunk) {
+        // TODO
+    }
+}
+
+fn compute_unused_chunk_data_size(sections_read: i32, has_skylight: bool, chunk: &Chunk) -> i32 {
+    let light_size = sections_read * 16 * 16 * 8;
+    let sky_light_size = if has_skylight { light_size } else { 0 };
+    let biomes_size = if chunk.continuous { 256 } else { 0 };
+    return light_size + sky_light_size + biomes_size;
 }

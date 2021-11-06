@@ -2,14 +2,14 @@
 pub mod buffer;
 pub mod client;
 
-use std::io::Read;
-
 // Export the public types
 pub use self::buffer::ReadBuffer;
 pub use self::buffer::WriteBuffer;
 pub use self::client::Client;
 
 // Common functions
+use std::io::Read;
+
 fn read_var_int(source: &mut impl Read) -> i32 {
     let mut val: i32 = 0;
     let mut buf = [0; 1];
@@ -36,4 +36,8 @@ fn calc_varint_size(mut value: i32) -> usize {
         }
     }
     return size;
+}
+
+fn block_pos_to_idx(x: u32, y: u32, z: u32) -> u32 {
+    return (y * 16 + z) * 16 + x;
 }

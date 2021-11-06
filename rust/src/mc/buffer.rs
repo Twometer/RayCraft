@@ -1,8 +1,8 @@
-use std::io::{Cursor, Read};
-
-use inflate::{inflate_bytes, inflate_bytes_zlib, InflateStream};
-
 use super::read_var_int;
+
+use inflate::inflate_bytes_zlib;
+
+use std::io::{Cursor, Read};
 
 pub struct WriteBuffer {
     buf: Vec<u8>,
@@ -76,6 +76,18 @@ impl ReadBuffer {
         return buf[0];
     }
 
+    pub fn read_u16(&mut self) -> u16 {
+        let mut buf = [0; 2];
+        self.read_bytes(&mut buf);
+        return u16::from_be_bytes(buf);
+    }
+
+    pub fn read_u16_le(&mut self) -> u16 {
+        let mut buf = [0; 2];
+        self.read_bytes(&mut buf);
+        return u16::from_le_bytes(buf);
+    }
+
     pub fn read_i32(&mut self) -> i32 {
         let mut buf = [0; 4];
         self.read_bytes(&mut buf);
@@ -105,6 +117,14 @@ impl ReadBuffer {
         let mut buf = vec![0u8; len as usize];
         self.read_bytes(&mut buf);
         return String::from_utf8(buf).expect("invalid string received");
+    }
+
+    pub fn read_bool(&mut self) -> bool {
+        return self.read_u8() != 0;
+    }
+
+    pub fn skip(&mut self, num: u64) {
+        self.buf.set_position(self.buf.position() + num);
     }
 
     pub fn decompress(&mut self) {
