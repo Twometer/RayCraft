@@ -26,10 +26,23 @@ namespace RayCraft.Tests
             Assert.AreEqual((3, 2), hits[4]);
         }
 
+        [TestMethod]
+        public void TestIntersect2()
+        {
+            Span<(int, int)> hits = stackalloc (int, int)[5];
+            Intersect2(new Vector2(0.5f, 0.5f), new Vector2(1.0f, 0.5f), hits);
+            Assert.AreEqual((1, 0), hits[0]);
+            Assert.AreEqual((1, 1), hits[1]);
+            Assert.AreEqual((2, 1), hits[2]);
+            Assert.AreEqual((3, 1), hits[3]);
+            Assert.AreEqual((3, 2), hits[4]);
+        }
+
+
         private (int x, int y) GetFirstIntersection(Vector2 location, Vector2 direction)
         {
             int x = (int)MathF.Floor(location.X);
-            int y = (int)Math.Floor(location.Y);
+            int y = (int)MathF.Floor(location.Y);
 
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
@@ -46,7 +59,7 @@ namespace RayCraft.Tests
         private void Intersect(Vector2 location, Vector2 direction, Span<(int, int)> hits)
         {
             int x = (int)MathF.Floor(location.X);
-            int y = (int)Math.Floor(location.Y);
+            int y = (int)MathF.Floor(location.Y);
 
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
@@ -69,36 +82,31 @@ namespace RayCraft.Tests
             }
         }
 
-        private void Intersect3d(Vector3 location, Vector3 direction, Span<(int, int, int)> hits)
+        private void Intersect2(Vector2 location, Vector2 direction, Span<(int, int)> hits)
         {
             int x = (int)MathF.Floor(location.X);
             int y = (int)MathF.Floor(location.Y);
-            int z = (int)MathF.Floor(location.Z);
 
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
-            int orientationZ = MathF.Sign(direction.Z);
+
+            float srx = 1 / direction.X;
+            float sry = 1 / direction.Y;
+
+            float nrx = (x + orientationX - location.X) * srx;
+            float nry = (y + orientationY - location.Y) * sry;
 
             for (int i = 0; i < hits.Length; i++)
             {
-                float rx = (x + orientationX - location.X) / direction.X;
-                float ry = (y + orientationY - location.Y) / direction.Y;
-                float rz = (z + orientationZ - location.Z) / direction.Z;
-
-                if (rx < ry && rx < rz)
+                if (nrx < nry)
                 {
-                    hits[i] = (x += orientationX, y, z);
-                    location = new Vector3(x, location.Y + rx * direction.Y, location.Z + rx * direction.Z);
-                }
-                else if (ry < rx && ry < rz)
-                {
-                    hits[i] = (x, y += orientationY, z);
-                    location = new Vector3(location.X + ry * direction.X, y, location.Z + ry * direction.Z);
+                    hits[i] = (x += orientationX, y);
+                    nrx += srx;
                 }
                 else
                 {
-                    hits[i] = (x, y, z += orientationZ);
-                    location = new Vector3(location.X + rz * direction.X, location.Y + rz * direction.Y, z);
+                    hits[i] = (x, y += orientationY);
+                    nry += sry;
                 }
             }
         }
