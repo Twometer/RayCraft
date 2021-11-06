@@ -9,10 +9,31 @@ pub enum State {
     Play,
 }
 
+#[derive(Default)]
+pub struct World {
+    time: i64,
+    age: i64,
+}
+
+#[derive(Default)]
+pub struct Player {
+    entity_id: i32,
+    game_mode: u8,
+    health: f32,
+    hunger: i32,
+    pos_x: f32,
+    pos_y: f32,
+    pos_z: f32,
+    rot_x: f32,
+    rot_y: f32,
+}
+
 pub struct Client {
     socket: TcpStream,
     compression_threshold: usize,
     state: State,
+    player: Player,
+    world: World,
 }
 
 impl Client {
@@ -24,6 +45,8 @@ impl Client {
                     socket: stream,
                     compression_threshold: 0,
                     state: State::Login,
+                    player: Player::default(),
+                    world: World::default(),
                 });
             }
             Err(e) => {
@@ -64,7 +87,7 @@ impl Client {
         }
     }
 
-    pub fn send_packet(&mut self, id: u32, payload: &WriteBuffer) {
+    pub fn send_packet(&mut self, id: i32, payload: &WriteBuffer) {
         let mut packet = WriteBuffer::new();
 
         if self.compression_threshold > 0 {
@@ -73,11 +96,11 @@ impl Client {
             //        the actual compression, which is why outbound packets which are larger than the threshold (typically
             //        256 bytes)  will probably cause a disconnect. However, 99% of packets are <256 b
             let packet_len = calc_varint_size(id) + calc_varint_size(0) + payload.len();
-            packet.write_varint(packet_len as u32);
+            packet.write_varint(packet_len as i32);
             packet.write_varint(0);
         } else {
             let packet_len = calc_varint_size(id) + payload.len();
-            packet.write_varint(packet_len as u32);
+            packet.write_varint(packet_len as i32);
         }
 
         packet.write_varint(id);
@@ -93,7 +116,7 @@ impl Client {
         payload.write_varint(47); // Protocol version for 1.8.x
         payload.write_string(hostname);
         payload.write_u16(port);
-        payload.write_varint(next_state as u32);
+        payload.write_varint(next_state as i32);
         self.send_packet(0x00, &payload);
     }
 
@@ -103,13 +126,13 @@ impl Client {
         self.send_packet(0x00, &payload);
     }
 
-    pub fn send_keep_alive(&mut self, timestamp: u32) {
+    pub fn send_keep_alive(&mut self, timestamp: i32) {
         let mut payload = WriteBuffer::new();
         payload.write_varint(timestamp);
         self.send_packet(0x00, &payload);
     }
 
-    fn handle_login_packet(&mut self, packet_id: u32, mut packet_buf: ReadBuffer) {
+    fn handle_login_packet(&mut self, packet_id: i32, mut packet_buf: ReadBuffer) {
         match packet_id {
             0x02 => {
                 println!("login completed");
@@ -123,7 +146,7 @@ impl Client {
         }
     }
 
-    fn handle_play_packet(&mut self, packet_id: u32, mut packet_buf: ReadBuffer) {
+    fn handle_play_packet(&mut self, packet_id: i32, mut packet_buf: ReadBuffer) {
         println!("Received packet id #{}", packet_id,);
         match packet_id {
             0x00 => {
@@ -134,12 +157,34 @@ impl Client {
             }
             0x01 => {
                 // Join Game
-                let entity_id = packet_buf.read_var_int();
-                let game_mode = packet_buf.read_byte();
+                self.player.entity_id = packet_buf.read_i32();
+                self.player.game_mode = packet_buf.read_u8();
                 println!(
                     "logged in with entity id {} and gamemode {}",
-                    entity_id, game_mode
+                    self.player.entity_id, self.player.game_mode
                 );
+            }
+            0x02 => {
+                // Chat
+            }
+            0x03 => {
+                // Time
+                self.world.age = packet_buf.read_i64();
+                self.world.time = packet_buf.read_i64();
+            }
+            0x06 => {
+                // Health
+                self.player.health = packet_buf.read_f32();
+                self.player.hunger = packet_buf.read_var_int();
+            }
+            0x08 => {
+                // PosLook
+                self.player.pos_x = packet_buf.read_f64() as f32;
+                self.player.pos_y = packet_buf.read_f64() as f32;
+                self.player.pos_z = packet_buf.read_f64() as f32;
+
+                self.player.rot_x = packet_buf.read_f32();
+                self.player.rot_y = packet_buf.read_f32();
             }
             _ => {}
         }

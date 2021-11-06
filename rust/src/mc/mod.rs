@@ -10,13 +10,13 @@ pub use self::buffer::WriteBuffer;
 pub use self::client::Client;
 
 // Common functions
-fn read_var_int(source: &mut impl Read) -> u32 {
-    let mut val: u32 = 0;
+fn read_var_int(source: &mut impl Read) -> i32 {
+    let mut val: i32 = 0;
     let mut buf = [0; 1];
     for i in 0..4 {
         source.read_exact(&mut buf).expect("failed to read VarInt");
 
-        let masked = (buf[0] & 0x7f) as u32;
+        let masked = (buf[0] & 0x7f) as i32;
         val |= masked << i * 7;
 
         if buf[0] & 0x80 == 0 {
@@ -26,7 +26,7 @@ fn read_var_int(source: &mut impl Read) -> u32 {
     return val;
 }
 
-fn calc_varint_size(mut value: u32) -> usize {
+fn calc_varint_size(mut value: i32) -> usize {
     let mut size: usize = 0;
     loop {
         value >>= 7;

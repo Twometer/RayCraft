@@ -15,7 +15,7 @@ impl WriteBuffer {
         WriteBuffer { buf: Vec::new() }
     }
 
-    pub fn write_varint(&mut self, mut value: u32) {
+    pub fn write_varint(&mut self, mut value: i32) {
         loop {
             let mut cur_byte = (value & 0x7f) as u8;
             value >>= 7;
@@ -35,7 +35,7 @@ impl WriteBuffer {
     }
 
     pub fn write_string(&mut self, value: &str) {
-        self.write_varint(value.len() as u32);
+        self.write_varint(value.len() as i32);
         let bytes = value.as_bytes();
         self.write_bytes(&bytes);
     }
@@ -64,14 +64,38 @@ impl ReadBuffer {
         }
     }
 
-    pub fn read_var_int(&mut self) -> u32 {
+    pub fn read_var_int(&mut self) -> i32 {
         return read_var_int(&mut self.buf);
     }
 
-    pub fn read_byte(&mut self) -> u8 {
+    pub fn read_u8(&mut self) -> u8 {
         let mut buf = [0; 1];
         self.read_bytes(&mut buf);
         return buf[0];
+    }
+
+    pub fn read_i32(&mut self) -> i32 {
+        let mut buf = [0; 4];
+        self.read_bytes(&mut buf);
+        return i32::from_be_bytes(buf);
+    }
+
+    pub fn read_i64(&mut self) -> i64 {
+        let mut buf = [0; 8];
+        self.read_bytes(&mut buf);
+        return i64::from_be_bytes(buf);
+    }
+
+    pub fn read_f32(&mut self) -> f32 {
+        let mut buf = [0; 4];
+        self.read_bytes(&mut buf);
+        return f32::from_be_bytes(buf);
+    }
+
+    pub fn read_f64(&mut self) -> f64 {
+        let mut buf = [0; 8];
+        self.read_bytes(&mut buf);
+        return f64::from_be_bytes(buf);
     }
 
     pub fn decompress(&mut self) {
