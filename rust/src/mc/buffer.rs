@@ -1,5 +1,7 @@
 use std::io::{Cursor, Read};
 
+use inflate::{inflate_bytes, inflate_bytes_zlib, InflateStream};
+
 use super::read_var_int;
 
 pub struct WriteBuffer {
@@ -106,7 +108,13 @@ impl ReadBuffer {
     }
 
     pub fn decompress(&mut self) {
-        unimplemented!();
+        let mut in_buf = Vec::<u8>::new();
+        self.buf
+            .read_to_end(&mut in_buf)
+            .expect("failed to read from buffer");
+
+        let out_buf = inflate_bytes_zlib(&in_buf).expect("failed to decompress packet");
+        self.buf = Cursor::new(out_buf);
     }
 
     fn read_bytes(&mut self, bytes: &mut [u8]) {

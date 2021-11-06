@@ -6,3 +6,4 @@ authors = ["Twometer", "daniel-lerch"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+inflate = "0.4.5"
