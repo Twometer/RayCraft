@@ -21,7 +21,7 @@ namespace RayCraft.Renderer
 
         public void UpdateMatrix(Location src)
         {
-            cam = Matrix4x4.CreateFromYawPitchRoll(ToRadians(src.Yaw), ToRadians(src.Pitch), 0.0f);
+            cam = Matrix4x4.CreateFromYawPitchRoll(ToRadians(-src.Yaw), ToRadians(-src.Pitch), 0.0f);
         }
 
         public Vector3 CreateRay(float x, float y)

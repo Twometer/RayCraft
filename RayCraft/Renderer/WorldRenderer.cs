@@ -8,8 +8,6 @@ using System.Threading;
 
 namespace RayCraft.Renderer
 {
-    using line_t = Int32;
-
     public class WorldRenderer
     {
         private const int MaxRayLength = 40;
@@ -121,11 +119,9 @@ namespace RayCraft.Renderer
             return color.Lvl0;
         }
 
-
-
-        private HitResult BlockLookup(line_t x, line_t y, line_t z)
+        private HitResult BlockLookup(int x, int y, int z)
         {
-            var blockId = RayCraftGame.Instance.World.GetBlock((int)x, (int)y, (int)z);
+            var blockId = RayCraftGame.Instance.World.GetBlock(x, y, z);
             if (blockId != 0)
             {
                 return new HitResult(blockId, EnumFace.YPos, false);
@@ -133,15 +129,90 @@ namespace RayCraft.Renderer
             return null;
         }
 
-        private HitResult Bresenham3d(line_t x1, line_t y1, line_t z1, line_t x2, line_t y2, line_t z2)
+        private HitResult GetHitResult(in Location origin, Vector3 direction)
+        {
+            Vector3 location = new(origin.X, origin.Y + EyeHeight, origin.Z);
+            int maxIterations = (int)(MaxRayLength / direction.Length());
+
+            int x = (int)MathF.Floor(location.X);
+            int y = (int)MathF.Floor(location.Y);
+            int z = (int)MathF.Floor(location.Z);
+
+            int orientationX = MathF.Sign(direction.X);
+            int orientationY = MathF.Sign(direction.Y);
+            int orientationZ = MathF.Sign(direction.Z);
+
+            float srx = MathF.Abs(1 / direction.X);
+            float sry = MathF.Abs(1 / direction.Y);
+            float srz = MathF.Abs(1 / direction.Z);
+
+            float nrx = GetNextR(location.X, x, orientationX, srx);
+            float nry = GetNextR(location.Y, y, orientationY, sry);
+            float nrz = GetNextR(location.Z, z, orientationZ, srz);
+
+            for (int i = 0; i < maxIterations; i++)
+            {
+                if (nrx < nry && nrx < nrz)
+                {
+                    HitResult hit = BlockLookup(x += orientationX, y, z);
+                    if (hit is not null) return hit;
+                    nrx += srx;
+                }
+                else if (nry < nrx && nry < nrz)
+                {
+                    HitResult hit = BlockLookup(x, y += orientationY, z);
+                    if (hit is not null) return hit;
+                    nry += sry;
+                }
+                else
+                {
+                    HitResult hit = BlockLookup(x, y, z += orientationZ);
+                    if (hit is not null) return hit;
+                    nrz += srz;
+                }
+            }
+
+            return null;
+        }
+
+        private static float GetNextR(float location, int current, int orientation, float sr)
+        {
+            if (orientation == 0)
+            {
+                return float.PositiveInfinity;
+            }
+            else if (location == 0.0f)
+            {
+                return MathF.Abs(current + orientation) * sr;
+            }
+            else
+            {
+                return MathF.Abs(current + (orientation == 1 ? 1 : 0) - location) * sr;
+            }
+        }
+
+        private HitResult GetHitResult1(Location origin, Vector3 ray)
+        {
+            float x1 = origin.X;
+            float y1 = origin.Y + EyeHeight;
+            float z1 = origin.Z;
+
+            float x2 = x1 + ray.X * MaxRayLength;
+            float y2 = y1 + ray.Y * MaxRayLength;
+            float z2 = z1 + ray.Z * MaxRayLength;
+
+            return Bresenham3d((int)x1, (int)y1, (int)z1, (int)x2, (int)y2, (int)z2);
+        }
+
+        private HitResult Bresenham3d(int x1, int y1, int z1, int x2, int y2, int z2)
         {
             var dx = Math.Abs(x2 - x1);
             var dy = Math.Abs(y2 - y1);
             var dz = Math.Abs(z2 - z1);
 
-            line_t xs;
-            line_t ys;
-            line_t zs;
+            int xs;
+            int ys;
+            int zs;
             if (x2 > x1)
                 xs = 1;
             else
@@ -233,19 +304,6 @@ namespace RayCraft.Renderer
             }
 
             return null;
-        }
-
-        private HitResult GetHitResult(Location origin, Vector3 ray)
-        {
-            float x1 = origin.X;
-            float y1 = origin.Y + EyeHeight;
-            float z1 = origin.Z;
-
-            float x2 = x1 + ray.X * MaxRayLength;
-            float y2 = y1 + ray.Y * MaxRayLength;
-            float z2 = z1 + ray.Z * MaxRayLength;
-
-            return Bresenham3d((line_t)x1, (line_t)y1, (line_t)z1, (line_t)x2, (line_t)y2, (line_t)z2);
         }
 
         private HitResult GetHitResult0(Location origin, Vector3 ray)

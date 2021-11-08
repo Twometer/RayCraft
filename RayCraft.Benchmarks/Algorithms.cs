@@ -17,8 +17,8 @@ namespace RayCraft
             float srx = MathF.Abs(1 / direction.X);
             float sry = MathF.Abs(1 / direction.Y);
 
-            float nrx = GetNextR(location.X, direction.X, x, orientationX, srx);
-            float nry = GetNextR(location.Y, direction.Y, y, orientationY, sry);
+            float nrx = GetNextR(location.X, x, orientationX, srx);
+            float nry = GetNextR(location.Y, y, orientationY, sry);
 
             for (int i = 0; i < hits.Length; i++)
             {
@@ -49,9 +49,9 @@ namespace RayCraft
             float sry = MathF.Abs(1 / direction.Y);
             float srz = MathF.Abs(1 / direction.Z);
 
-            float nrx = GetNextR(location.X, direction.X, x, orientationX, srx);
-            float nry = GetNextR(location.Y, direction.Y, y, orientationY, sry);
-            float nrz = GetNextR(location.Z, direction.Z, z, orientationZ, srz);
+            float nrx = GetNextR(location.X, x, orientationX, srx);
+            float nry = GetNextR(location.Y, y, orientationY, sry);
+            float nrz = GetNextR(location.Z, z, orientationZ, srz);
 
             for (int i = 0; i < hits.Length; i++)
             {
@@ -73,7 +73,7 @@ namespace RayCraft
             }
         }
 
-        private static float GetNextR(float location, float direction, int current, int orientation, float sr)
+        private static float GetNextR(float location, int current, int orientation, float sr)
         {
             if (orientation == 0)
             {
@@ -85,7 +85,7 @@ namespace RayCraft
             }
             else
             {
-                return MathF.Abs(current + (direction > 0 ? 1 : 0) - location) * sr;
+                return MathF.Abs(current + (orientation == 1 ? 1 : 0) - location) * sr;
             }
         }
     }
