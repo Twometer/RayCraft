@@ -28,7 +28,7 @@ namespace RayCraft.Renderer
         {
             float px = (2 * (x + 0.5f) / imageWidth - 1) * aspectRatio * scale;
             float py = (1 - 2 * (y + 0.5f) / imageHeight) * scale;
-
+            
             return Vector3.Normalize(Vector3.Transform(new Vector3(px, py, -1), cam));
         }
 
