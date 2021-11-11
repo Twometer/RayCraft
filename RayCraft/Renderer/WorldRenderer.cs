@@ -10,7 +10,7 @@ namespace RayCraft.Renderer
 {
     public class WorldRenderer
     {
-        private const int MaxRayLength = 40;
+        private const int MaxRayLength = 128;
         private const float Precision = 0.1f;
         private const int PrecisionStep = 100;
         private const float EyeHeight = 1.8f;
@@ -134,10 +134,6 @@ namespace RayCraft.Renderer
             Vector3 location = new(origin.X, origin.Y + EyeHeight, origin.Z);
             int maxIterations = (int)(MaxRayLength / direction.Length());
 
-            int x = (int)MathF.Floor(location.X);
-            int y = (int)MathF.Floor(location.Y);
-            int z = (int)MathF.Floor(location.Z);
-
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
             int orientationZ = MathF.Sign(direction.Z);
@@ -146,9 +142,17 @@ namespace RayCraft.Renderer
             float sry = MathF.Abs(1 / direction.Y);
             float srz = MathF.Abs(1 / direction.Z);
 
-            float nrx = GetNextR(location.X, x, orientationX, srx);
-            float nry = GetNextR(location.Y, y, orientationY, sry);
-            float nrz = GetNextR(location.Z, z, orientationZ, srz);
+            float fx = MathF.Floor(location.X);
+            float fy = MathF.Floor(location.Y);
+            float fz = MathF.Floor(location.Z);
+
+            int x = GetCurrent(location.X, fx, orientationX);
+            int y = GetCurrent(location.Y, fy, orientationY);
+            int z = GetCurrent(location.Z, fz, orientationZ);
+
+            float nrx = GetNextR(location.X, fx, orientationX, srx);
+            float nry = GetNextR(location.Y, fy, orientationY, sry);
+            float nrz = GetNextR(location.Z, fz, orientationZ, srz);
 
             for (int i = 0; i < maxIterations; i++)
             {
@@ -175,135 +179,30 @@ namespace RayCraft.Renderer
             return null;
         }
 
-        private static float GetNextR(float location, int current, int orientation, float sr)
+        private static int GetCurrent(float location, float floor, int orientation)
         {
-            if (orientation == 0)
+            if (location == floor && orientation == -1)
             {
-                return float.PositiveInfinity;
-            }
-            else if (location == 0.0f)
-            {
-                return MathF.Abs(current + orientation) * sr;
+                return (int)floor - 1;
             }
             else
             {
-                return MathF.Abs(current + (orientation == 1 ? 1 : 0) - location) * sr;
+                return (int)floor;
             }
         }
 
-        private HitResult GetHitResult1(Location origin, Vector3 ray)
+        private static float GetNextR(float location, float floor, int orientation, float sr)
         {
-            float x1 = origin.X;
-            float y1 = origin.Y + EyeHeight;
-            float z1 = origin.Z;
-
-            float x2 = x1 + ray.X * MaxRayLength;
-            float y2 = y1 + ray.Y * MaxRayLength;
-            float z2 = z1 + ray.Z * MaxRayLength;
-
-            return Bresenham3d((int)x1, (int)y1, (int)z1, (int)x2, (int)y2, (int)z2);
-        }
-
-        private HitResult Bresenham3d(int x1, int y1, int z1, int x2, int y2, int z2)
-        {
-            var dx = Math.Abs(x2 - x1);
-            var dy = Math.Abs(y2 - y1);
-            var dz = Math.Abs(z2 - z1);
-
-            int xs;
-            int ys;
-            int zs;
-            if (x2 > x1)
-                xs = 1;
-            else
-                xs = -1;
-            if (y2 > y1)
-                ys = 1;
-            else
-                ys = -1;
-            if (z2 > z1)
-                zs = 1;
-            else
-                zs = -1;
-
-            if (dx >= dy && dx >= dz)
+            if (location == floor)
             {
-                var p1 = 2 * dy - dx;
-                var p2 = 2 * dz - dx;
-                while (x1 != x2)
-                {
-                    x1 += xs;
-                    if (p1 >= 0)
-                    {
-                        y1 += ys;
-                        p1 -= 2 * dx;
-                    }
-                    if (p2 >= 0)
-                    {
-                        z1 += zs;
-                        p2 -= 2 * dx;
-                    }
-                    p1 += 2 * dy;
-                    p2 += 2 * dz;
-
-                    var result = BlockLookup(x1, y1, z1);
-                    if (result != null)
-                        return result;
-
-                }
-            }
-            else if (dy >= dx && dy >= dz)
-            {
-                var p1 = 2 * dx - dy;
-                var p2 = 2 * dz - dy;
-                while (y1 != y2)
-                {
-                    y1 += ys;
-                    if (p1 >= 0)
-                    {
-                        x1 += xs;
-                        p1 -= 2 * dy;
-                    }
-                    if (p2 >= 0)
-                    {
-                        z1 += zs;
-                        p2 -= 2 * dy;
-                    }
-                    p1 += 2 * dx;
-                    p2 += 2 * dz;
-
-                    var result = BlockLookup(x1, y1, z1);
-                    if (result != null)
-                        return result;
-                }
+                // This returns infinity when sr is infinity.
+                return 1 * sr;
             }
             else
             {
-                var p1 = 2 * dy - dz;
-                var p2 = 2 * dx - dz;
-                while (z1 != z2)
-                {
-                    z1 += zs;
-                    if (p1 >= 0)
-                    {
-                        y1 += ys;
-                        p1 -= 2 * dz;
-                    }
-                    if (p2 >= 0)
-                    {
-                        x1 += xs;
-                        p2 -= 2 * dz;
-                    }
-                    p1 += 2 * dy;
-                    p2 += 2 * dx;
-
-                    var result = BlockLookup(x1, y1, z1);
-                    if (result != null)
-                        return result;
-                }
+                // The first term will always be greater than zero and therefore returns inifnity when sr is infinity.
+                return MathF.Abs(floor + (orientation == 1 ? 1 : 0) - location) * sr;
             }
-
-            return null;
         }
 
         private HitResult GetHitResult0(Location origin, Vector3 ray)
