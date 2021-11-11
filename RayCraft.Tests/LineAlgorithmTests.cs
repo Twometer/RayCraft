@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Numerics;
 
-using static RayCraft.Algorithms;
+using static RayCraft.Algorithms.Line;
 
 namespace RayCraft.Tests
 {

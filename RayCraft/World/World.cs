@@ -1,7 +1,9 @@
 ﻿using Craft.Client.World.Entities;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Craft.Client.World
 {
@@ -105,6 +107,32 @@ namespace Craft.Client.World
                 }
             }
             return aabbs;
+        }
+
+        public void Export()
+        {
+            List<object> jsonChunks = new();
+            for (int x = 0; x < 64; x++)
+            {
+                for (int z = 0; z < 64; z++)
+                {
+                    Chunk chunk = chunks[x, z];
+                    if (chunk is not null)
+                    {
+                        List<object> jsonSections = new();
+                        for (int y = 0; y < 16; y++)
+                        {
+                            if (chunk.sections[y] is not null)
+                            {
+                                jsonSections.Add(new { Y = y, Data = chunk.sections[y].Blocks });
+                            }
+                        }
+                        jsonChunks.Add(new { X = x, Z = z, Sections = jsonSections });
+                    }
+                }
+            }
+            using FileStream file = new("world.json", FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+            JsonSerializer.SerializeAsync(file, jsonChunks).GetAwaiter().GetResult();
         }
 
         public static AxisAlignedBB GetCubicBox(int x, int y, int z)

@@ -1,44 +1,13 @@
-﻿using System;
+﻿using RayCraft.Data;
+using System;
 using System.Numerics;
 
-namespace RayCraft
+namespace RayCraft.Algorithms
 {
-    public static class Algorithms
+    public static class Block
     {
-        // A block at x, y is a symmetric interval [x, x+1] and [y, y+1]. From point x in positive direction the next block is x+1.
-        public static void Intersect(Vector2 location, Vector2 direction, Span<(int, int)> hits)
-        {
-            int orientationX = MathF.Sign(direction.X);
-            int orientationY = MathF.Sign(direction.Y);
-
-            float srx = MathF.Abs(1 / direction.X);
-            float sry = MathF.Abs(1 / direction.Y);
-
-            float fx = MathF.Floor(location.X);
-            float fy = MathF.Floor(location.Y);
-
-            int x = GetCurrent(location.X, fx, orientationX);
-            int y = GetCurrent(location.Y, fy, orientationY);
-
-            float nrx = GetNextR(location.X, fx, orientationX, srx);
-            float nry = GetNextR(location.Y, fy, orientationY, sry);
-
-            for (int i = 0; i < hits.Length; i++)
-            {
-                if (nrx < nry)
-                {
-                    hits[i] = (x += orientationX, y);
-                    nrx += srx;
-                }
-                else
-                {
-                    hits[i] = (x, y += orientationY);
-                    nry += sry;
-                }
-            }
-        }
-
-        public static void Intersect(Vector3 location, Vector3 direction, Span<(int, int, int)> hits)
+        private const float MaxRayLength = 256.0f;
+        public static BlockHit Intersect(this IWorld world, Vector3 location, Vector3 direction)
         {
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
@@ -60,38 +29,51 @@ namespace RayCraft
             float nry = GetNextR(location.Y, fy, orientationY, sry);
             float nrz = GetNextR(location.Z, fz, orientationZ, srz);
 
-            for (int i = 0; i < hits.Length; i++)
+            //for (int i = 0; i < hits.Length; i++)
+            while (true)
             {
                 if (nrx < nry && nrx < nrz)
                 {
-                    hits[i] = (x += orientationX, y, z);
+                    if (nrx > MaxRayLength) return default;
+                    x += orientationX;
+                    byte block = world.GetBlock(x, unchecked((byte)y), z);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
                     nrx += srx;
                 }
                 else if (nry < nrx && nry < nrz)
                 {
-                    hits[i] = (x, y += orientationY, z);
+                    if (nry > MaxRayLength) return default;
+                    y += orientationY;
+                    if (y < 0 || y > 255) return default;
+                    byte block = world.GetBlock(x, unchecked((byte)y), z);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
                     nry += sry;
                 }
                 else
                 {
-                    hits[i] = (x, y, z += orientationZ);
+                    if (nrz > MaxRayLength) return default;
+                    z += orientationZ;
+                    byte block = world.GetBlock(x, unchecked((byte)y), z);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
                     nrz += srz;
                 }
             }
+
+            //return default;
         }
 
         private static int GetCurrent(float location, float floor, int orientation)
         {
             if (location == floor && orientation == -1)
             {
-                return (int)floor -1;
+                return (int)floor - 1;
             }
             else
             {
                 return (int)floor;
             }
         }
-        
+
         private static float GetNextR(float location, float floor, int orientation, float sr)
         {
             if (location == floor)

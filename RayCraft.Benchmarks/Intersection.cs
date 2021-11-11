@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using RayCraft.Algorithms;
 using System;
 using System.Numerics;
 
@@ -16,7 +17,7 @@ namespace RayCraft.Benchmarks
             {
                 for (int y = 0; y < 1080; y++)
                 {
-                    Algorithms.Intersect(new Vector2(0.5f + x * 0.0025f, 0.5f + y * 0.0025f), new Vector2(1.0f, 0.5f), hits2d);
+                    Line.Intersect(new Vector2(0.5f + x * 0.0025f, 0.5f + y * 0.0025f), new Vector2(1.0f, 0.5f), hits2d);
                 }
             }
         }
@@ -28,7 +29,7 @@ namespace RayCraft.Benchmarks
             {
                 for (int y = 0; y < 1080; y++)
                 {
-                    Algorithms.Intersect(new Vector3(0.5f + x * 0.0025f, 82f, 0.5f + y * 0.0025f), new Vector3(1.0f, 0.5f, 0.5f), hits3d);
+                    Line.Intersect(new Vector3(0.5f + x * 0.0025f, 82f, 0.5f + y * 0.0025f), new Vector3(1.0f, 0.5f, 0.5f), hits3d);
                 }
             }
         }
