@@ -8,11 +8,9 @@ using System.Threading;
 
 namespace RayCraft.Renderer
 {
-    using line_t = Int32;
-
     public class WorldRenderer
     {
-        private const int MaxRayLength = 40;
+        private const int MaxRayLength = 128;
         private const float Precision = 0.1f;
         private const int PrecisionStep = 100;
         private const float EyeHeight = 1.8f;
@@ -121,162 +119,90 @@ namespace RayCraft.Renderer
             return color.Lvl0;
         }
 
-        private bool TestRayAabbIntersection(float originX, float originY, float originZ, float rayX, float rayY, float rayZ, line_t minX, line_t minY, line_t minZ)
+        private HitResult BlockLookup(int x, int y, int z)
         {
-            var maxX = minX + 1;
-            var maxY = minY + 1;
-            var maxZ = minZ + 1;
-            var tMin = -1E9f;
-            var tMax = 1E9f;
-            if (rayX != 0f)
-            {
-                var tx1 = (minX - originX) / rayX;
-                var tx2 = (maxX - originX) / rayX;
-                tMin = Math.Max(tMin, Math.Min(tx1, tx2));
-                tMax = Math.Min(tMax, Math.Max(tx1, tx2));
-            }
-            if (rayY != 0f)
-            {
-                var ty1 = (minY - originY) / rayY;
-                var ty2 = (maxY - originY) / rayY;
-                tMin = Math.Max(tMin, Math.Min(ty1, ty2));
-                tMax = Math.Min(tMax, Math.Max(ty1, ty2));
-            }
-            if (rayZ != 0f)
-            {
-                var tz1 = (minZ - originZ) / rayZ;
-                var tz2 = (maxZ - originZ) / rayZ;
-                tMin = Math.Max(tMin, Math.Min(tz1, tz2));
-                tMax = Math.Min(tMax, Math.Max(tz1, tz2));
-            }
-
-            return tMax >= tMin;
-        }
-
-
-        private HitResult BlockLookup(Vector3 origin, Vector3 ray, line_t x, line_t y, line_t z)
-        {
-            var blockId = RayCraftGame.Instance.World.GetBlock((int)x, (int)y, (int)z);
-            if (blockId != 0 && TestRayAabbIntersection(origin.X, origin.Y, origin.Z, ray.X, ray.Y, ray.Z, x, y, z))
+            var blockId = RayCraftGame.Instance.World.GetBlock(x, y, z);
+            if (blockId != 0)
             {
                 return new HitResult(blockId, EnumFace.YPos, false);
             }
             return null;
         }
 
-        private HitResult Bresenham3d(Vector3 origin, Vector3 ray, line_t x1, line_t y1, line_t z1, line_t x2, line_t y2, line_t z2)
+        private HitResult GetHitResult(in Location origin, Vector3 direction)
         {
-            var dx = Math.Abs(x2 - x1);
-            var dy = Math.Abs(y2 - y1);
-            var dz = Math.Abs(z2 - z1);
+            Vector3 location = new(origin.X, origin.Y + EyeHeight, origin.Z);
+            int maxIterations = (int)(MaxRayLength / direction.Length());
 
-            line_t xs;
-            line_t ys;
-            line_t zs;
-            if (x2 > x1)
-                xs = 1;
-            else
-                xs = -1;
-            if (y2 > y1)
-                ys = 1;
-            else
-                ys = -1;
-            if (z2 > z1)
-                zs = 1;
-            else
-                zs = -1;
+            int orientationX = MathF.Sign(direction.X);
+            int orientationY = MathF.Sign(direction.Y);
+            int orientationZ = MathF.Sign(direction.Z);
 
-            if (dx >= dy && dx >= dz)
+            float srx = MathF.Abs(1 / direction.X);
+            float sry = MathF.Abs(1 / direction.Y);
+            float srz = MathF.Abs(1 / direction.Z);
+
+            float fx = MathF.Floor(location.X);
+            float fy = MathF.Floor(location.Y);
+            float fz = MathF.Floor(location.Z);
+
+            int x = GetCurrent(location.X, fx, orientationX);
+            int y = GetCurrent(location.Y, fy, orientationY);
+            int z = GetCurrent(location.Z, fz, orientationZ);
+
+            float nrx = GetNextR(location.X, fx, orientationX, srx);
+            float nry = GetNextR(location.Y, fy, orientationY, sry);
+            float nrz = GetNextR(location.Z, fz, orientationZ, srz);
+
+            for (int i = 0; i < maxIterations; i++)
             {
-                var p1 = 2 * dy - dx;
-                var p2 = 2 * dz - dx;
-                while (x1 != x2)
+                if (nrx < nry && nrx < nrz)
                 {
-                    x1 += xs;
-                    if (p1 >= 0)
-                    {
-                        y1 += ys;
-                        p1 -= 2 * dx;
-                    }
-                    if (p2 >= 0)
-                    {
-                        z1 += zs;
-                        p2 -= 2 * dx;
-                    }
-                    p1 += 2 * dy;
-                    p2 += 2 * dz;
-
-                    var result = BlockLookup(origin, ray, x1, y1, z1);
-                    if (result != null)
-                        return result;
-
+                    HitResult hit = BlockLookup(x += orientationX, y, z);
+                    if (hit is not null) return hit;
+                    nrx += srx;
                 }
-            }
-            else if (dy >= dx && dy >= dz)
-            {
-                var p1 = 2 * dx - dy;
-                var p2 = 2 * dz - dy;
-                while (y1 != y2)
+                else if (nry < nrx && nry < nrz)
                 {
-                    y1 += ys;
-                    if (p1 >= 0)
-                    {
-                        x1 += xs;
-                        p1 -= 2 * dy;
-                    }
-                    if (p2 >= 0)
-                    {
-                        z1 += zs;
-                        p2 -= 2 * dy;
-                    }
-                    p1 += 2 * dx;
-                    p2 += 2 * dz;
-
-                    var result = BlockLookup(origin, ray, x1, y1, z1);
-                    if (result != null)
-                        return result;
+                    HitResult hit = BlockLookup(x, y += orientationY, z);
+                    if (hit is not null) return hit;
+                    nry += sry;
                 }
-            }
-            else
-            {
-                var p1 = 2 * dy - dz;
-                var p2 = 2 * dx - dz;
-                while (z1 != z2)
+                else
                 {
-                    z1 += zs;
-                    if (p1 >= 0)
-                    {
-                        y1 += ys;
-                        p1 -= 2 * dz;
-                    }
-                    if (p2 >= 0)
-                    {
-                        x1 += xs;
-                        p2 -= 2 * dz;
-                    }
-                    p1 += 2 * dy;
-                    p2 += 2 * dx;
-
-                    var result = BlockLookup(origin, ray, x1, y1, z1);
-                    if (result != null)
-                        return result;
+                    HitResult hit = BlockLookup(x, y, z += orientationZ);
+                    if (hit is not null) return hit;
+                    nrz += srz;
                 }
             }
 
             return null;
         }
 
-        private HitResult GetHitResult(Location origin, Vector3 ray)
+        private static int GetCurrent(float location, float floor, int orientation)
         {
-            float x1 = origin.X;
-            float y1 = origin.Y + EyeHeight;
-            float z1 = origin.Z;
+            if (location == floor && orientation == -1)
+            {
+                return (int)floor - 1;
+            }
+            else
+            {
+                return (int)floor;
+            }
+        }
 
-            float x2 = x1 + ray.X * MaxRayLength;
-            float y2 = y1 + ray.Y * MaxRayLength;
-            float z2 = z1 + ray.Z * MaxRayLength;
-
-            return Bresenham3d(new Vector3(x1, y1, z1), ray, (line_t)x1, (line_t)y1, (line_t)z1, (line_t)x2, (line_t)y2, (line_t)z2);
+        private static float GetNextR(float location, float floor, int orientation, float sr)
+        {
+            if (location == floor)
+            {
+                // This returns infinity when sr is infinity.
+                return 1 * sr;
+            }
+            else
+            {
+                // The first term will always be greater than zero and therefore returns inifnity when sr is infinity.
+                return MathF.Abs(floor + (orientation == 1 ? 1 : 0) - location) * sr;
+            }
         }
 
         private HitResult GetHitResult0(Location origin, Vector3 ray)
