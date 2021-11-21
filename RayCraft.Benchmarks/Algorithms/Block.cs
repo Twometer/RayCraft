@@ -37,7 +37,13 @@ namespace RayCraft.Algorithms
                     if (nrx > maxRayLength) return default;
                     x += orientationX;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationX == 1 ? BlockFace.XPos : BlockFace.XNeg);
+                    if (block != default)
+                    {
+                        return new BlockHit(x, unchecked((byte)y), z, block,
+                            orientationX == 1 ? BlockFace.XPos : BlockFace.XNeg,
+                            new Vector3(x, location.Y + nrx * direction.Y, location.Z + nrx * direction.Z));
+                    }
+
                     nrx += srx;
                 }
                 else if (nry < nrx && nry < nrz)
@@ -46,7 +52,13 @@ namespace RayCraft.Algorithms
                     y += orientationY;
                     if (y < 0 || y > 255) return default;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationY == 1 ? BlockFace.YPos : BlockFace.YNeg);
+                    if (block != default)
+                    {
+                        return new BlockHit(x, unchecked((byte)y), z, block, 
+                            orientationY == 1 ? BlockFace.YPos : BlockFace.YNeg,
+                            new Vector3(location.X + nry * direction.X, y, location.Z + nry * direction.Z));
+                    }
+
                     nry += sry;
                 }
                 else
@@ -54,7 +66,13 @@ namespace RayCraft.Algorithms
                     if (nrz > maxRayLength) return default;
                     z += orientationZ;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationZ == 1 ? BlockFace.ZPos : BlockFace.ZNeg);
+                    if (block != default)
+                    {
+                        return new BlockHit(x, unchecked((byte)y), z, block,
+                            orientationZ == 1 ? BlockFace.ZPos : BlockFace.ZNeg,
+                            new Vector3(location.X + nrz * direction.X, location.Y + nrz * direction.Y, z));
+                    }
+
                     nrz += srz;
                 }
             }
