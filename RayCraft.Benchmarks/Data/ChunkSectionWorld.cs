@@ -1,4 +1,6 @@
-﻿namespace RayCraft.Data
+﻿using System;
+
+namespace RayCraft.Data
 {
     public class ChunkSectionWorld : IWorld
     {
@@ -9,9 +11,14 @@
         //                         [,] chunks
         private readonly byte[]?[]?[,] chunks;
 
+        public ChunkSectionWorld()
+        {
+            chunks = new byte[]?[]?[64, 64];
+        }
+
         public ChunkSectionWorld(WorldSerializer.Chunk[] chunks)
         {
-            this.chunks = new byte[]?[]?[64,64];
+            this.chunks = new byte[]?[]?[64, 64];
             foreach (var chunk in chunks)
             {
                 byte[]?[] sections = new byte[]?[16];
@@ -40,6 +47,26 @@
                 return 0;
 
             return section[((((y & 0x0F) << 4) + (z & 0x0F)) << 4) + (x & 0x0F)];
+        }
+
+        public void SetBlock(int x, byte y, int z, byte blockId)
+        {
+            uint cx = (uint)(x >> 4) + 32;
+            uint cz = (uint)(z >> 4) + 32;
+
+            if (cx > 63)
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (cz > 63)
+                throw new ArgumentOutOfRangeException(nameof(z));
+
+            if (chunks[cx, cz] is null)
+                chunks[cx, cz] = new byte[]?[16];
+            byte[]?[] chunk = chunks[cx, cz]!;
+
+            if (chunk[y >> 4] is null) chunk[y >> 4] = new byte[4096];
+            byte[] section = chunk[z >> 4]!;
+
+            section[((((y & 0x0F) << 4) + (z & 0x0F)) << 4) + (x & 0x0F)] = blockId;
         }
     }
 }

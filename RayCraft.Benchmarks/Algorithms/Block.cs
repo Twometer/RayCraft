@@ -1,4 +1,5 @@
 ﻿using RayCraft.Data;
+using RayCraft.Renderer;
 using System;
 using System.Numerics;
 
@@ -6,8 +7,7 @@ namespace RayCraft.Algorithms
 {
     public static class Block
     {
-        private const float MaxRayLength = 256.0f;
-        public static BlockHit Intersect(this IWorld world, Vector3 location, Vector3 direction)
+        public static BlockHit Intersect(IWorld world, Vector3 location, Vector3 direction, float maxRayLength)
         {
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
@@ -34,27 +34,27 @@ namespace RayCraft.Algorithms
             {
                 if (nrx < nry && nrx < nrz)
                 {
-                    if (nrx > MaxRayLength) return default;
+                    if (nrx > maxRayLength) return default;
                     x += orientationX;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationX == 1 ? BlockFace.XPos : BlockFace.XNeg);
                     nrx += srx;
                 }
                 else if (nry < nrx && nry < nrz)
                 {
-                    if (nry > MaxRayLength) return default;
+                    if (nry > maxRayLength) return default;
                     y += orientationY;
                     if (y < 0 || y > 255) return default;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationY == 1 ? BlockFace.YPos : BlockFace.YNeg);
                     nry += sry;
                 }
                 else
                 {
-                    if (nrz > MaxRayLength) return default;
+                    if (nrz > maxRayLength) return default;
                     z += orientationZ;
                     byte block = world.GetBlock(x, unchecked((byte)y), z);
-                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block);
+                    if (block != default) return new BlockHit(x, unchecked((byte)y), z, block, orientationZ == 1 ? BlockFace.ZPos : BlockFace.ZNeg);
                     nrz += srz;
                 }
             }
