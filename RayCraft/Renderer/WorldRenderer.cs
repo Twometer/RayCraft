@@ -23,7 +23,7 @@ namespace RayCraft.Renderer
         const int tileDiv = 4;
         private SemaphoreSlim sem = new SemaphoreSlim(0);
         private CountdownEvent e = new CountdownEvent(tileDiv * tileDiv);
-        private RenderMath math = new RenderMath();
+        private Camera math;
         private Location currentLocation;
 
         private class WorkItem
@@ -44,10 +44,10 @@ namespace RayCraft.Renderer
 
         public WorldRenderer(int width, int height)
         {
+            math = new Camera(width, height, 70);
             displayBuffer = new DisplayBuffer(width, height);
             this.width = width;
             this.height = height;
-            math.Initialize(width, height);
             BootThreads();
         }
 
@@ -89,7 +89,7 @@ namespace RayCraft.Renderer
 
             EntityPlayer player = RayCraftGame.Instance.Player;
             currentLocation = new Location((float)player.PosX, (float)player.PosY, (float)player.PosZ, player.Yaw, player.Pitch);
-            math.UpdateMatrix(currentLocation);
+            math.Update(currentLocation.Yaw, currentLocation.Pitch);
 
             float tileWidth = width / tileDiv;
             float tileHeight = height / tileDiv;

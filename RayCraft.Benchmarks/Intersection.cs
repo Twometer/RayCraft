@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using RayCraft.Algorithms;
+using RayCraft.Renderer;
 using System;
 using System.Numerics;
 
@@ -7,8 +8,17 @@ namespace RayCraft.Benchmarks
 {
     public class Intersection
     {
-        private readonly (int, int)[] hits2d = new (int, int)[64];
-        private readonly (int, int, int)[] hits3d = new (int, int, int)[64];
+        private readonly Camera camera;
+        private readonly (int, int)[] hits2d;
+        private readonly (int, int, int)[] hits3d;
+
+        public Intersection()
+        {
+            camera = new Camera(1920, 1080, 70);
+            camera.Update(0.0f, 0.0f);
+            hits2d = new (int, int)[64];
+            hits3d = new (int, int, int)[64];
+        }
 
         [Benchmark]
         public void BenchIntersect2d()
@@ -17,7 +27,8 @@ namespace RayCraft.Benchmarks
             {
                 for (int y = 0; y < 1080; y++)
                 {
-                    Line.Intersect(new Vector2(0.5f + x * 0.0025f, 0.5f + y * 0.0025f), new Vector2(1.0f, 0.5f), hits2d);
+                    Vector3 vec = camera.CreateRay(x, y);
+                    Line.Intersect(new Vector2(0.5f, 0.5f), new Vector2(vec.X, vec.Z), hits2d);
                 }
             }
         }
@@ -29,7 +40,7 @@ namespace RayCraft.Benchmarks
             {
                 for (int y = 0; y < 1080; y++)
                 {
-                    Line.Intersect(new Vector3(0.5f + x * 0.0025f, 82f, 0.5f + y * 0.0025f), new Vector3(1.0f, 0.5f, 0.5f), hits3d);
+                    Line.Intersect(new Vector3(0.5f, 82f, 0.5f), camera.CreateRay(x, y), hits3d);
                 }
             }
         }
@@ -41,7 +52,8 @@ namespace RayCraft.Benchmarks
             {
                 for (int y = 0; y < 1080; y++)
                 {
-                    Bresenham3d(x, y, 0, x + 1000, y + 1000, 1000, hits3d);
+                    Vector3 vec = camera.CreateRay(x, y);
+                    Bresenham3d(0, 82, 0, (int)(1000.0f * vec.X), 82, (int)(1000.0f * vec.Z), hits3d);
                 }
             }
         }
