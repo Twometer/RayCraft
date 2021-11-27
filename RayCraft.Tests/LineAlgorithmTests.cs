@@ -154,5 +154,16 @@ namespace RayCraft.Tests
             Assert.Equal((1, 1, 0), hits[2]);
             Assert.Equal((1, 1, 1), hits[3]);
         }
+
+        [Fact]
+        public void TestIntersect_3D_Xneg_Yneg_Zneg_FullOffset()
+        {
+            Span<(int, int, int)> hits = stackalloc (int, int, int)[4];
+            Intersect(new Vector3(3.1f, 50.2f, -2.5f), new Vector3(-1.3f, -1.0f, -0.8f), hits);
+            Assert.Equal((2, 50, -3), hits[0]);
+            Assert.Equal((2, 49, -3), hits[1]);
+            Assert.Equal((2, 49, -4), hits[2]);
+            Assert.Equal((1, 49, -4), hits[3]);
+        }
     }
 }
