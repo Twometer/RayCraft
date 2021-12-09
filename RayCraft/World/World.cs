@@ -127,7 +127,7 @@ namespace Craft.Client.World
                                 jsonSections.Add(new { Y = y, Data = chunk.sections[y].Blocks });
                             }
                         }
-                        jsonChunks.Add(new { X = x, Z = z, Sections = jsonSections });
+                        jsonChunks.Add(new { X = x - 32, Z = z - 32, Sections = jsonSections });
                     }
                 }
             }

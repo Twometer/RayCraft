@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,6 +12,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RayCraft.Core\RayCraft.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="world.json" Visible="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

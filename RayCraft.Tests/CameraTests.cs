@@ -11,7 +11,6 @@ namespace RayCraft.Tests
         public CameraTests()
         {
             camera = new Camera(1920, 1080, 70);
-            camera.Update(0.0f, 0.0f);
         }
 
         [Fact]

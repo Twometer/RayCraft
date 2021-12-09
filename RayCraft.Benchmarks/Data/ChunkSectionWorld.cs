@@ -64,7 +64,7 @@ namespace RayCraft.Data
             byte[]?[] chunk = chunks[cx, cz]!;
 
             if (chunk[y >> 4] is null) chunk[y >> 4] = new byte[4096];
-            byte[] section = chunk[z >> 4]!;
+            byte[] section = chunk[y >> 4]!;
 
             section[((((y & 0x0F) << 4) + (z & 0x0F)) << 4) + (x & 0x0F)] = blockId;
         }

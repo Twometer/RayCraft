@@ -13,6 +13,7 @@ namespace RayCraft.Renderer
 
         public Camera(int width, int height, float fov)
         {
+            matrix = Matrix4x4.Identity;
             inverseWidth = 1.0f / width;
             inverseHeight = 1.0f / height;
             aspectRatio = width * inverseHeight;
