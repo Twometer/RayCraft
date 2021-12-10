@@ -6,7 +6,9 @@ namespace RayCraft.Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<Intersection>();
+            BenchmarkSwitcher
+                .FromTypes(new[] { typeof(LineIntersection), typeof(WorldIntersection) })
+                .Run(args);
         }
     }
 }

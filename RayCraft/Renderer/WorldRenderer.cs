@@ -23,7 +23,7 @@ namespace RayCraft.Renderer
         const int tileDiv = 4;
         private SemaphoreSlim sem = new SemaphoreSlim(0);
         private CountdownEvent e = new CountdownEvent(tileDiv * tileDiv);
-        private RenderMath math = new RenderMath();
+        private Camera camera;
         private Location currentLocation;
 
         private class WorkItem
@@ -44,10 +44,10 @@ namespace RayCraft.Renderer
 
         public WorldRenderer(int width, int height)
         {
+            camera = new Camera(width, height, 70);
             displayBuffer = new DisplayBuffer(width, height);
             this.width = width;
             this.height = height;
-            math.Initialize(width, height);
             BootThreads();
         }
 
@@ -66,7 +66,7 @@ namespace RayCraft.Renderer
                             {
                                 for (int x = item.x; x < item.x + item.w; x++)
                                 {
-                                    var ray = math.CreateRay(x, y);
+                                    var ray = camera.CreateRay(x, y);
                                     var hitResult = GetHitResult(currentLocation, ray);
                                     var blockColor = GetBlockColor(hitResult);
                                     displayBuffer.SetPixel(x, y, blockColor);
@@ -89,7 +89,7 @@ namespace RayCraft.Renderer
 
             EntityPlayer player = RayCraftGame.Instance.Player;
             currentLocation = new Location((float)player.PosX, (float)player.PosY, (float)player.PosZ, player.Yaw, player.Pitch);
-            math.UpdateMatrix(currentLocation);
+            camera.Update(currentLocation.Yaw, currentLocation.Pitch);
 
             float tileWidth = width / tileDiv;
             float tileHeight = height / tileDiv;
@@ -132,7 +132,6 @@ namespace RayCraft.Renderer
         private HitResult GetHitResult(in Location origin, Vector3 direction)
         {
             Vector3 location = new(origin.X, origin.Y + EyeHeight, origin.Z);
-            int maxIterations = (int)(MaxRayLength / direction.Length());
 
             int orientationX = MathF.Sign(direction.X);
             int orientationY = MathF.Sign(direction.Y);
@@ -154,7 +153,7 @@ namespace RayCraft.Renderer
             float nry = GetNextR(location.Y, fy, orientationY, sry);
             float nrz = GetNextR(location.Z, fz, orientationZ, srz);
 
-            for (int i = 0; i < maxIterations; i++)
+            for (int i = 0; i < MaxRayLength; i++)
             {
                 if (nrx < nry && nrx < nrz)
                 {
