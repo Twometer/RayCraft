@@ -21,31 +21,53 @@ namespace RayCraft.Benchmarks
             chunkSectionWorld = WorldSerializer.LoadChunkSectionWorld("world.json").GetAwaiter().GetResult();
         }
 
+
         [Benchmark]
-        [Arguments(128f)]
-        [Arguments(256f)]
-        public void BenchSingleThread(float maxRayLength)
+        public void MaxLengthSingleThread()
         {
             for (int x = 0; x < resolutionX; x++)
             {
                 for (int y = 0; y < resolutionY; y++)
                 {
-                    Block.Intersect(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), maxRayLength);
+                    Block.IntersectMaxLength(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), 150f);
                 }
             }
         }
 
-
         [Benchmark]
-        [Arguments(128f)]
-        [Arguments(256f)]
-        public void BenchLinqParallel(float maxRayLength)
+        public void MaxLengthLinqParallel()
         {
             Parallel.For(0, resolutionX, x =>
             {
                 for (int y = 0; y < resolutionY; y++)
                 {
-                    Block.Intersect(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), maxRayLength);
+                    Block.IntersectMaxLength(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), 150f);
+                };
+            });
+        }
+
+
+
+        [Benchmark]
+        public void MaxCountSingleThread()
+        {
+            for (int x = 0; x < resolutionX; x++)
+            {
+                for (int y = 0; y < resolutionY; y++)
+                {
+                    Block.IntersectMaxCount(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), 256);
+                }
+            }
+        }
+
+        [Benchmark]
+        public void MaxCountLinqParallel()
+        {
+            Parallel.For(0, resolutionX, x =>
+            {
+                for (int y = 0; y < resolutionY; y++)
+                {
+                    Block.IntersectMaxCount(chunkSectionWorld, new Vector3(0.5f, 82.0f, 0.5f), camera.CreateRay(x, y), 256);
                 };
             });
         }
